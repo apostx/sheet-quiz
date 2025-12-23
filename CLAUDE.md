@@ -20,24 +20,23 @@ database: none
 auth: none
 data-source: public-google-sheets-only
 
-# folders-planned
+# folders-exists
 src/components
 src/hooks
 src/services
 src/types
 src/utils
-
-# folders-exists
 src/stories
 src/assets
 .storybook
 public
 
 # features
-read questions and answers from public google sheets
-multiple choice quiz ui
+read questions from public google sheets (csv-export)
+multiple choice quiz ui with shuffled options
+tooltip-based hints and notes
+detailed results review screen
 in-memory results calculation
-storybook documented components
 tailwind styling
 
 # guidelines
@@ -47,18 +46,20 @@ approach: step-by-step
 uncertainty: ask-user
 context-format: flat-sections
 test-before-next-step: always verify build/tests pass
-scope: ask before multi-item work, default to smallest interpretation [TRIAL]
-context-update: update and optimize context file after every finished request
+scope: ask before multi-item work, default to smallest interpretation
+context-update: update and optimize context file after every finished request, never add implementation-status or completion tracking sections
+git-commits: use conventional commits format (feat/fix/docs/style/refactor/test/chore), do not add claude code signature or co-authored-by lines
 
-# completed
-vite + react + typescript initialized
-tailwind css v4 configured and integrated
-storybook v10 initialized
-storybook sample components removed
-app converted to tailwind classes
-app.stories.tsx created
-build verified passing
+# data-structure
+spreadsheet-id: from-url-param
+sheet-name: from-url-param (topic name)
+row-format: question, note, option1-response, option1-hint, option2-response, option2-hint, ...
+correct-answer: first-option-always
+answer-tracking: by-object-reference
 
 # next-steps
-create sheets service
-build quiz components
+create component storybook stories
+add vitest unit tests
+mobile responsive improvements
+keyboard navigation support
+github pages deployment setup
