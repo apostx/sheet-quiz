@@ -37,6 +37,7 @@ multiple choice quiz ui with shuffled options
 tooltip-based hints and notes
 detailed results review screen
 in-memory results calculation
+storybook documented components
 tailwind styling
 
 # guidelines
@@ -58,7 +59,6 @@ correct-answer: first-option-always
 answer-tracking: by-object-reference
 
 # next-steps
-create component storybook stories
 add vitest unit tests
 mobile responsive improvements
 keyboard navigation support
