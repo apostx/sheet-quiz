@@ -2,7 +2,9 @@
 name: sheet-quiz
 type: static-spa
 hosting: github-pages
-status: dev-environment-ready
+status: deployment-configured
+deploy-url: https://apostx.github.io/sheet-quiz/
+storybook-url: https://apostx.github.io/sheet-quiz/storybook/
 
 # stack
 typescript
@@ -41,6 +43,7 @@ detailed results review with partial selection indicators
 in-memory results calculation
 storybook documented components
 tailwind styling
+automated github pages deployment via github actions
 
 # guidelines
 eol: LF
@@ -66,4 +69,3 @@ backward-compatibility: empty correctIndices defaults to "1" (first option, sing
 add vitest unit tests
 mobile responsive improvements
 keyboard navigation support
-github pages deployment setup
