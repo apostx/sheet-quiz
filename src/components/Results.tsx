@@ -21,20 +21,20 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-        <h2 className="text-3xl font-bold mb-4 text-center">{topicName}</h2>
-        <p className="text-xl mb-6 text-center">{getMessage()}</p>
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center">{topicName}</h2>
+        <p className="text-lg sm:text-xl mb-6 text-center">{getMessage()}</p>
 
-        <div className="text-6xl font-bold mb-6 text-blue-600 text-center">
+        <div className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-blue-600 text-center">
           {score} / {total}
         </div>
 
-        <div className="text-2xl mb-8 text-gray-600 text-center">{percentage}%</div>
+        <div className="text-xl sm:text-2xl mb-8 text-gray-600 text-center">{percentage}%</div>
 
         <div className="flex justify-center">
           <button
             onClick={onRestart}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="px-4 py-3 sm:px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             Try Again
           </button>
@@ -42,7 +42,7 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-2xl font-bold mb-4">Review</h3>
+        <h3 className="text-xl sm:text-2xl font-bold mb-4">Review</h3>
         {questions.map((question, index) => {
           const userAnswerSet = userAnswers.get(index) || new Set();
 
@@ -52,16 +52,16 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
             question.correctOptions.every(opt => userAnswerSet.has(opt));
 
           return (
-            <div key={index} className="bg-white rounded-lg shadow p-6">
+            <div key={index} className="bg-white rounded-lg shadow p-4 sm:p-6">
               <div className="flex items-start gap-3 mb-4">
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
+                <div className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
                   {isCorrect ? '✓' : '✗'}
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-bold text-lg mb-1">Question {index + 1}</h4>
-                  <p className="text-gray-800">{question.question}</p>
+                  <h4 className="font-bold text-base sm:text-lg mb-1">Question {index + 1}</h4>
+                  <p className="text-gray-800 text-sm sm:text-base">{question.question}</p>
                   {question.note && (
-                    <p className="text-gray-600 text-sm mt-2 italic">{question.note}</p>
+                    <p className="text-gray-600 text-xs sm:text-sm mt-2 italic">{question.note}</p>
                   )}
                 </div>
               </div>

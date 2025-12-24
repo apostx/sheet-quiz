@@ -87,15 +87,15 @@ export const Quiz = () => {
     <div className="min-h-screen bg-gray-100 p-4 py-8">
       <div className="max-w-4xl mx-auto mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold">{topic.name}</h1>
-          <div className="text-lg text-gray-600">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{topic.name}</h1>
+          <div className="text-sm sm:text-base md:text-lg text-gray-600">
             Question {quiz.currentQuestionIndex + 1} of {quiz.totalQuestions}
           </div>
         </div>
 
-        <div className="w-full bg-gray-300 rounded-full h-2">
+        <div className="w-full bg-gray-300 rounded-full h-1.5 sm:h-2">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all"
+            className="bg-blue-600 h-1.5 sm:h-2 rounded-full transition-all"
             style={{
               width: `${((quiz.currentQuestionIndex + 1) / quiz.totalQuestions) * 100}%`,
             }}
@@ -115,7 +115,7 @@ export const Quiz = () => {
           <button
             onClick={quiz.submitAnswer}
             disabled={quiz.selectedOptions.size === 0}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+            className="px-4 py-3 sm:px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
           >
             Submit Answer
           </button>
@@ -124,7 +124,7 @@ export const Quiz = () => {
         {quiz.isAnswered && (
           <button
             onClick={quiz.nextQuestion}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="px-4 py-3 sm:px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             {quiz.isLastQuestion ? 'View Results' : 'Next Question'}
           </button>
