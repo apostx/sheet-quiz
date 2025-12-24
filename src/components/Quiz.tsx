@@ -26,6 +26,7 @@ export const Quiz = () => {
         const service = createSheetsService();
         const data = await service.fetchQuizTopic(params.spreadsheetId, params.sheet);
         setTopic(data);
+        document.title = `Quiz: ${data.name}`;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load quiz');
       } finally {
