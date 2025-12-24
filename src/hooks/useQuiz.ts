@@ -4,17 +4,17 @@ import { shuffleOptions } from '../utils';
 
 interface QuizState {
   currentQuestionIndex: number;
-  selectedOption: QuizOption | null;
+  selectedOptions: Set<QuizOption>;
   answeredQuestions: Set<number>;
   correctAnswers: Set<number>;
-  userAnswers: Map<number, QuizOption>;
+  userAnswers: Map<number, Set<QuizOption>>;
   showResult: boolean;
 }
 
 export const useQuiz = (topic: QuizTopic | null) => {
   const [state, setState] = useState<QuizState>({
     currentQuestionIndex: 0,
-    selectedOption: null,
+    selectedOptions: new Set(),
     answeredQuestions: new Set(),
     correctAnswers: new Set(),
     userAnswers: new Map(),
@@ -34,19 +34,40 @@ export const useQuiz = (topic: QuizTopic | null) => {
   const isLastQuestion = state.currentQuestionIndex === totalQuestions - 1;
 
   const selectOption = (option: QuizOption) => {
-    setState(prev => ({ ...prev, selectedOption: option }));
+    setState(prev => {
+      const newSelected = new Set(prev.selectedOptions);
+
+      if (currentQuestion?.isMultiAnswer) {
+        // Multi-answer: toggle selection
+        if (newSelected.has(option)) {
+          newSelected.delete(option);
+        } else {
+          newSelected.add(option);
+        }
+      } else {
+        // Single-answer: replace selection
+        newSelected.clear();
+        newSelected.add(option);
+      }
+
+      return { ...prev, selectedOptions: newSelected };
+    });
   };
 
   const submitAnswer = () => {
-    if (!state.selectedOption || !currentQuestion) return;
+    if (state.selectedOptions.size === 0 || !currentQuestion) return;
 
-    const isCorrect = state.selectedOption === currentQuestion.correctOption;
+    // Check exact match: all correct selected, no incorrect selected
+    const isCorrect =
+      state.selectedOptions.size === currentQuestion.correctOptions.length &&
+      currentQuestion.correctOptions.every(opt => state.selectedOptions.has(opt));
+
     const newAnsweredQuestions = new Set(state.answeredQuestions);
     const newCorrectAnswers = new Set(state.correctAnswers);
     const newUserAnswers = new Map(state.userAnswers);
 
     newAnsweredQuestions.add(state.currentQuestionIndex);
-    newUserAnswers.set(state.currentQuestionIndex, state.selectedOption);
+    newUserAnswers.set(state.currentQuestionIndex, new Set(state.selectedOptions));
     if (isCorrect) {
       newCorrectAnswers.add(state.currentQuestionIndex);
     }
@@ -66,7 +87,7 @@ export const useQuiz = (topic: QuizTopic | null) => {
       setState(prev => ({
         ...prev,
         currentQuestionIndex: prev.currentQuestionIndex + 1,
-        selectedOption: null,
+        selectedOptions: new Set(),
       }));
     }
   };
@@ -74,7 +95,7 @@ export const useQuiz = (topic: QuizTopic | null) => {
   const restart = () => {
     setState({
       currentQuestionIndex: 0,
-      selectedOption: null,
+      selectedOptions: new Set(),
       answeredQuestions: new Set(),
       correctAnswers: new Set(),
       userAnswers: new Map(),
@@ -89,7 +110,7 @@ export const useQuiz = (topic: QuizTopic | null) => {
     currentQuestion,
     currentQuestionIndex: state.currentQuestionIndex,
     totalQuestions,
-    selectedOption: state.selectedOption,
+    selectedOptions: state.selectedOptions,
     isAnswered,
     isLastQuestion,
     showResult: state.showResult,

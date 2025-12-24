@@ -7,7 +7,8 @@ export interface QuizQuestion {
   question: string;
   note: string;
   options: QuizOption[];
-  correctOption: QuizOption; // Reference to the correct answer option
+  correctOptions: QuizOption[]; // References to the correct answer options
+  isMultiAnswer: boolean; // True if brackets used in spreadsheet, false otherwise
 }
 
 export interface QuizTopic {

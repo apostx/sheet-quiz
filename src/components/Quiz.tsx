@@ -104,7 +104,7 @@ export const Quiz = () => {
 
       <QuestionCard
         question={quiz.currentQuestion}
-        selectedOption={quiz.selectedOption}
+        selectedOptions={quiz.selectedOptions}
         isAnswered={quiz.isAnswered}
         onSelectOption={quiz.selectOption}
       />
@@ -113,7 +113,7 @@ export const Quiz = () => {
         {!quiz.isAnswered && (
           <button
             onClick={quiz.submitAnswer}
-            disabled={!quiz.selectedOption}
+            disabled={quiz.selectedOptions.size === 0}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
           >
             Submit Answer

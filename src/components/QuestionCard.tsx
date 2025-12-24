@@ -3,14 +3,14 @@ import { OptionButton } from './OptionButton';
 
 interface QuestionCardProps {
   question: QuizQuestion;
-  selectedOption: QuizOption | null;
+  selectedOptions: Set<QuizOption>;
   isAnswered: boolean;
   onSelectOption: (option: QuizOption) => void;
 }
 
 export const QuestionCard = ({
   question,
-  selectedOption,
+  selectedOptions,
   isAnswered,
   onSelectOption,
 }: QuestionCardProps) => {
@@ -39,9 +39,10 @@ export const QuestionCard = ({
             <OptionButton
               key={index}
               option={option}
-              isSelected={selectedOption === option}
+              isSelected={selectedOptions.has(option)}
               isAnswered={isAnswered}
-              isCorrect={option === question.correctOption}
+              isCorrect={question.correctOptions.includes(option)}
+              isMultiAnswer={question.isMultiAnswer}
               onClick={() => onSelectOption(option)}
             />
           ))}

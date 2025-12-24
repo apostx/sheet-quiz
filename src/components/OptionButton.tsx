@@ -5,6 +5,7 @@ interface OptionButtonProps {
   isSelected: boolean;
   isAnswered: boolean;
   isCorrect: boolean;
+  isMultiAnswer: boolean;
   onClick: () => void;
 }
 
@@ -13,6 +14,7 @@ export const OptionButton = ({
   isSelected,
   isAnswered,
   isCorrect,
+  isMultiAnswer,
   onClick,
 }: OptionButtonProps) => {
   const getButtonClass = () => {
@@ -42,7 +44,37 @@ export const OptionButton = ({
       className={getButtonClass()}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="font-medium flex-1">{option.response}</div>
+        <div className="flex items-center gap-3 flex-1">
+          {/* Render checkbox for multi-answer, radio for single-answer */}
+          <div className="flex-shrink-0">
+            {isMultiAnswer ? (
+              // Checkbox
+              <div className={`w-5 h-5 border-2 rounded flex items-center justify-center ${
+                isSelected
+                  ? 'bg-blue-600 border-blue-600'
+                  : 'border-gray-400'
+              }`}>
+                {isSelected && (
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+            ) : (
+              // Radio button
+              <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${
+                isSelected
+                  ? 'border-blue-600'
+                  : 'border-gray-400'
+              }`}>
+                {isSelected && (
+                  <div className="w-3 h-3 rounded-full bg-blue-600" />
+                )}
+              </div>
+            )}
+          </div>
+          <div className="font-medium">{option.response}</div>
+        </div>
         {option.hint && (
           <div className="relative group flex-shrink-0">
             <div className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs cursor-help">

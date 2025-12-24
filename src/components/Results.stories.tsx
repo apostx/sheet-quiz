@@ -31,44 +31,47 @@ const sampleQuestions: QuizQuestion[] = [
     question: 'What is the capital of France?',
     note: 'This question tests your knowledge of European geography',
     options: [option1q1, option2q1, option3q1],
-    correctOption: option1q1,
+    correctOptions: [option1q1],
+    isMultiAnswer: false,
   },
   {
     question: 'What is 2 + 2?',
     note: '',
     options: [option1q2, option2q2, option3q2],
-    correctOption: option1q2,
+    correctOptions: [option1q2],
+    isMultiAnswer: false,
   },
   {
     question: 'What color is the sky on a clear day?',
     note: 'Think about what you see when you look up',
     options: [option1q3, option2q3, option3q3],
-    correctOption: option1q3,
+    correctOptions: [option1q3],
+    isMultiAnswer: false,
   },
 ];
 
-const perfectScoreAnswers = new Map<number, QuizOption>([
-  [0, option1q1],
-  [1, option1q2],
-  [2, option1q3],
+const perfectScoreAnswers = new Map<number, Set<QuizOption>>([
+  [0, new Set([option1q1])],
+  [1, new Set([option1q2])],
+  [2, new Set([option1q3])],
 ]);
 
-const goodScoreAnswers = new Map<number, QuizOption>([
-  [0, option1q1],
-  [1, option1q2],
-  [2, option2q3], // incorrect
+const goodScoreAnswers = new Map<number, Set<QuizOption>>([
+  [0, new Set([option1q1])],
+  [1, new Set([option1q2])],
+  [2, new Set([option2q3])], // incorrect
 ]);
 
-const mixedScoreAnswers = new Map<number, QuizOption>([
-  [0, option1q1],
-  [1, option2q2], // incorrect
-  [2, option2q3], // incorrect
+const mixedScoreAnswers = new Map<number, Set<QuizOption>>([
+  [0, new Set([option1q1])],
+  [1, new Set([option2q2])], // incorrect
+  [2, new Set([option2q3])], // incorrect
 ]);
 
-const poorScoreAnswers = new Map<number, QuizOption>([
-  [0, option2q1], // incorrect
-  [1, option2q2], // incorrect
-  [2, option2q3], // incorrect
+const poorScoreAnswers = new Map<number, Set<QuizOption>>([
+  [0, new Set([option2q1])], // incorrect
+  [1, new Set([option2q2])], // incorrect
+  [2, new Set([option2q3])], // incorrect
 ]);
 
 export const PerfectScore: Story = {

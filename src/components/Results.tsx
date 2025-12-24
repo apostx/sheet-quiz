@@ -5,7 +5,7 @@ interface ResultsProps {
   total: number;
   topicName: string;
   questions: QuizQuestion[];
-  userAnswers: Map<number, QuizOption>;
+  userAnswers: Map<number, Set<QuizOption>>;
   onRestart: () => void;
 }
 
@@ -44,8 +44,12 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
       <div className="space-y-4">
         <h3 className="text-2xl font-bold mb-4">Review</h3>
         {questions.map((question, index) => {
-          const userAnswer = userAnswers.get(index);
-          const isCorrect = userAnswer === question.correctOption;
+          const userAnswerSet = userAnswers.get(index) || new Set();
+
+          // Check if answer is correct (exact match for multi-answer)
+          const isCorrect =
+            userAnswerSet.size === question.correctOptions.length &&
+            question.correctOptions.every(opt => userAnswerSet.has(opt));
 
           return (
             <div key={index} className="bg-white rounded-lg shadow p-6">
@@ -64,22 +68,35 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
 
               <div className="ml-11 space-y-2">
                 {question.options.map((option, optIndex) => {
-                  const isUserAnswer = option === userAnswer;
-                  const isCorrectAnswer = option === question.correctOption;
+                  const isUserAnswer = userAnswerSet.has(option);
+                  const isCorrectAnswer = question.correctOptions.includes(option);
 
                   let bgClass = 'bg-gray-50';
-                  if (isCorrectAnswer) {
+                  let label = '';
+
+                  if (isCorrectAnswer && isUserAnswer) {
+                    // Correctly selected
                     bgClass = 'bg-green-100 border-2 border-green-500';
-                  } else if (isUserAnswer && !isCorrect) {
+                    label = '✓ Correct';
+                  } else if (isCorrectAnswer && !isUserAnswer) {
+                    // Missed correct answer
+                    bgClass = 'bg-green-100 border-2 border-green-500';
+                    label = '✓ Correct (not selected)';
+                  } else if (!isCorrectAnswer && isUserAnswer) {
+                    // Incorrectly selected
                     bgClass = 'bg-red-100 border-2 border-red-500';
+                    label = '✗ Your answer (incorrect)';
                   }
 
                   return (
                     <div key={optIndex} className={`p-3 rounded ${bgClass}`}>
                       <div className="flex items-center gap-2">
-                        {isCorrectAnswer && <span className="text-green-700 font-bold">✓ Correct:</span>}
-                        {isUserAnswer && !isCorrect && <span className="text-red-700 font-bold">Your answer:</span>}
-                        <span className={isCorrectAnswer || (isUserAnswer && !isCorrect) ? 'font-medium' : ''}>
+                        {label && (
+                          <span className={`font-bold ${isCorrectAnswer ? 'text-green-700' : 'text-red-700'}`}>
+                            {label}:
+                          </span>
+                        )}
+                        <span className={label ? 'font-medium' : ''}>
                           {option.response}
                         </span>
                       </div>

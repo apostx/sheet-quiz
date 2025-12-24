@@ -23,7 +23,8 @@ const sampleQuestion: QuizQuestion = {
   question: 'What is the capital of France?',
   note: 'This question tests your knowledge of European geography',
   options: [option1, option2, option3, option4],
-  correctOption: option1,
+  correctOptions: [option1],
+  isMultiAnswer: false,
 };
 
 const questionWithoutNote: QuizQuestion = {
@@ -35,13 +36,14 @@ const questionWithoutNote: QuizQuestion = {
     { response: '5', hint: '' },
     { response: '22', hint: 'This would be string concatenation' },
   ],
-  correctOption: { response: '4', hint: 'This is basic arithmetic' },
+  correctOptions: [{ response: '4', hint: 'This is basic arithmetic' }],
+  isMultiAnswer: false,
 };
 
 export const Default: Story = {
   args: {
     question: sampleQuestion,
-    selectedOption: null,
+    selectedOptions: new Set(),
     isAnswered: false,
     onSelectOption: (option) => console.log('Selected:', option.response),
   },
@@ -50,7 +52,7 @@ export const Default: Story = {
 export const WithoutNote: Story = {
   args: {
     question: questionWithoutNote,
-    selectedOption: null,
+    selectedOptions: new Set(),
     isAnswered: false,
     onSelectOption: (option) => console.log('Selected:', option.response),
   },
@@ -59,7 +61,7 @@ export const WithoutNote: Story = {
 export const OptionSelected: Story = {
   args: {
     question: sampleQuestion,
-    selectedOption: option1,
+    selectedOptions: new Set([option1]),
     isAnswered: false,
     onSelectOption: (option) => console.log('Selected:', option.response),
   },
@@ -68,7 +70,7 @@ export const OptionSelected: Story = {
 export const CorrectAnswerSubmitted: Story = {
   args: {
     question: sampleQuestion,
-    selectedOption: option1,
+    selectedOptions: new Set([option1]),
     isAnswered: true,
     onSelectOption: (option) => console.log('Selected:', option.response),
   },
@@ -77,7 +79,7 @@ export const CorrectAnswerSubmitted: Story = {
 export const IncorrectAnswerSubmitted: Story = {
   args: {
     question: sampleQuestion,
-    selectedOption: option2,
+    selectedOptions: new Set([option2]),
     isAnswered: true,
     onSelectOption: (option) => console.log('Selected:', option.response),
   },

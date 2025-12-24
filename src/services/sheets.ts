@@ -61,13 +61,51 @@ export class SheetsService {
     return rows.map(row => this.parseRow(row)).filter((q): q is QuizQuestion => q !== null);
   }
 
+  private parseCorrectIndices(
+    indicesStr: string | undefined,
+    options: QuizOption[]
+  ): { correctOptions: QuizOption[]; isMultiAnswer: boolean } {
+    // Default to "1" if empty (backward compatibility)
+    if (!indicesStr || indicesStr.trim() === '') {
+      return { correctOptions: [options[0]], isMultiAnswer: false };
+    }
+
+    // Check for bracket syntax: [1,2,3]
+    const trimmed = indicesStr.trim();
+    const isMultiAnswer = trimmed.startsWith('[') && trimmed.endsWith(']');
+
+    // Strip brackets if present
+    const indicesOnly = isMultiAnswer
+      ? trimmed.slice(1, -1)  // Remove [ and ]
+      : trimmed;
+
+    // Parse: "1,2,3" → [0,1,2] (convert 1-based to 0-based)
+    const indices = indicesOnly
+      .split(',')
+      .map(s => s.trim())
+      .map(s => parseInt(s, 10))
+      .filter(n => !isNaN(n) && n >= 1 && n <= options.length)
+      .map(n => n - 1);
+
+    // Fallback to first option if parsing failed
+    if (indices.length === 0) {
+      return { correctOptions: [options[0]], isMultiAnswer: false };
+    }
+
+    return {
+      correctOptions: indices.map(i => options[i]),
+      isMultiAnswer
+    };
+  }
+
   private parseRow(row: string[]): QuizQuestion | null {
-    if (row.length < 4) {
-      return null; // Need at least question + note + one option pair
+    if (row.length < 5) {
+      return null; // Need at least question + note + correctIndices + one option pair
     }
 
     const question = row[0]?.trim();
     const note = row[1]?.trim();
+    const correctIndicesRaw = row[2]?.trim();
 
     if (!question) {
       return null; // Skip rows without a question
@@ -75,8 +113,8 @@ export class SheetsService {
 
     const options: QuizOption[] = [];
 
-    // Parse option pairs starting from column 3 (index 2)
-    for (let i = 2; i < row.length; i += 2) {
+    // Parse option pairs starting from column 3 (index 3)
+    for (let i = 3; i < row.length; i += 2) {
       const response = row[i]?.trim();
       const hint = row[i + 1]?.trim() || '';
 
@@ -89,11 +127,14 @@ export class SheetsService {
       return null; // Skip questions without options
     }
 
+    const { correctOptions, isMultiAnswer } = this.parseCorrectIndices(correctIndicesRaw, options);
+
     return {
       question,
       note: note || '',
       options,
-      correctOption: options[0], // First option is always correct
+      correctOptions,
+      isMultiAnswer,
     };
   }
 }
