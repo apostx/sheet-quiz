@@ -3,7 +3,7 @@ import { QuestionCard } from './QuestionCard';
 import { Results } from './Results';
 import { useQuiz } from '../hooks/useQuiz';
 import { createSheetsService } from '../services';
-import { getQuizParams } from '../utils';
+import { getQuizParams, shuffleArray } from '../utils';
 import type { QuizTopic } from '../types/quiz';
 
 export const Quiz = () => {
@@ -27,6 +27,13 @@ export const Quiz = () => {
 
         const service = createSheetsService();
         const data = await service.fetchQuizTopic(params.spreadsheetId, params.sheet, abortController.signal);
+
+        // Apply max limit with random selection if specified
+        if (params.max && params.max < data.questions.length) {
+          const shuffledQuestions = shuffleArray(data.questions);
+          data.questions = shuffledQuestions.slice(0, params.max);
+        }
+
         setTopic(data);
         document.title = `Quiz: ${data.name}`;
       } catch (err) {

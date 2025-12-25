@@ -37,7 +37,8 @@ public
 read questions from public google sheets (csv-export)
 single-answer and multi-answer question support
 radio buttons for single-answer, checkboxes for multi-answer
-shuffled quiz options
+shuffled quiz options (per question)
+max param for limiting questions with random selection (persists on restart, re-randomizes on page reload)
 tooltip-based hints and notes with tap-to-toggle on mobile (supports HTML with links and images, fixed centered on mobile, absolute positioned on desktop)
 click-outside detection for tooltip auto-close
 detailed results review with partial selection indicators
@@ -60,9 +61,12 @@ context-update: update and optimize context file after every finished request, n
 git-commits: use conventional commits format (feat/fix/docs/style/refactor/test/chore), do not add claude code signature or co-authored-by lines
 versioning: semantic versioning (MAJOR.MINOR.PATCH), bump MINOR for new features, PATCH for fixes, MAJOR for breaking changes
 
+# url-params
+spreadsheetId: required, Google Sheets document ID
+sheet: required, sheet/tab name (topic name)
+max: optional, limit questions to random subset (e.g., max=10)
+
 # data-structure
-spreadsheet-id: from-url-param
-sheet-name: from-url-param (topic name)
 row-format: question, note, correctIndices, option1-response, option1-hint, option2-response, option2-hint, ...
 correct-indices-syntax: "1" for single-answer, "[1,2,3]" for multi-answer (1-based, brackets determine UI type)
 answer-tracking: by-object-reference using Set for multi-select
