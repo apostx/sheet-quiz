@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { QuizOption } from '../types/quiz';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 interface OptionButtonProps {
   option: QuizOption;
@@ -21,23 +22,8 @@ export const OptionButton = ({
   const [showHintTooltip, setShowHintTooltip] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: Event) => {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
-        setShowHintTooltip(false);
-      }
-    };
-
-    if (showHintTooltip) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [showHintTooltip]);
+  const closeTooltip = useCallback(() => setShowHintTooltip(false), []);
+  useClickOutside(tooltipRef, showHintTooltip, closeTooltip);
 
   const getButtonClass = () => {
     const base = 'w-full p-3 sm:p-4 text-left rounded-lg border-2 transition-all';
@@ -64,6 +50,9 @@ export const OptionButton = ({
       onClick={onClick}
       disabled={isAnswered}
       className={getButtonClass()}
+      role={isMultiAnswer ? 'checkbox' : 'radio'}
+      aria-checked={isSelected}
+      aria-disabled={isAnswered}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 flex-1">
@@ -77,7 +66,7 @@ export const OptionButton = ({
                   : 'border-gray-400'
               }`}>
                 {isSelected && (
-                  <svg className="w-5 h-5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 )}
@@ -98,13 +87,21 @@ export const OptionButton = ({
           <div className="font-medium text-sm sm:text-base">{option.response}</div>
         </div>
         {option.hint && (
-          <div ref={tooltipRef} className="relative group flex-shrink-0">
+          <div ref={tooltipRef} className="relative group flex-shrink-0 pointer-events-auto">
             <div
               className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowHintTooltip(!showHintTooltip);
               }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setShowHintTooltip(!showHintTooltip);
+              }}
+              role="button"
+              aria-label="Show hint"
+              aria-expanded={showHintTooltip}
             >
               i
             </div>

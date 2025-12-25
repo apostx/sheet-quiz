@@ -14,6 +14,8 @@ export const Quiz = () => {
   const quiz = useQuiz(topic);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const loadQuiz = async () => {
       try {
         const params = getQuizParams();
@@ -24,17 +26,26 @@ export const Quiz = () => {
         }
 
         const service = createSheetsService();
-        const data = await service.fetchQuizTopic(params.spreadsheetId, params.sheet);
+        const data = await service.fetchQuizTopic(params.spreadsheetId, params.sheet, abortController.signal);
         setTopic(data);
         document.title = `Quiz: ${data.name}`;
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return; // Ignore abort errors
+        }
         setError(err instanceof Error ? err.message : 'Failed to load quiz');
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     loadQuiz();
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   if (loading) {

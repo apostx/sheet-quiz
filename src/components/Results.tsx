@@ -10,7 +10,7 @@ interface ResultsProps {
 }
 
 export const Results = ({ score, total, topicName, questions, userAnswers, onRestart }: ResultsProps) => {
-  const percentage = Math.round((score / total) * 100);
+  const percentage = total === 0 ? 0 : Math.round((score / total) * 100);
 
   const getMessage = () => {
     if (percentage === 100) return 'Perfect!';
@@ -52,7 +52,7 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
             question.correctOptions.every(opt => userAnswerSet.has(opt));
 
           return (
-            <div key={index} className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div key={`q-${index}-${question.question.slice(0, 20)}`} className="bg-white rounded-lg shadow p-4 sm:p-6">
               <div className="flex items-start gap-3 mb-4">
                 <div className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
                   {isCorrect ? '✓' : '✗'}
@@ -89,7 +89,7 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
                   }
 
                   return (
-                    <div key={optIndex} className={`p-3 rounded ${bgClass}`}>
+                    <div key={`opt-${optIndex}-${option.response.slice(0, 15)}`} className={`p-3 rounded ${bgClass}`}>
                       <div className="flex items-center gap-2">
                         {label && (
                           <span className={`font-bold ${isCorrectAnswer ? 'text-green-700' : 'text-red-700'}`}>

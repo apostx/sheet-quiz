@@ -1,11 +1,11 @@
 import type { QuizQuestion, QuizOption, QuizTopic } from '../types/quiz';
 
 export class SheetsService {
-  async fetchQuizTopic(spreadsheetId: string, sheetName: string): Promise<QuizTopic> {
+  async fetchQuizTopic(spreadsheetId: string, sheetName: string, signal?: AbortSignal): Promise<QuizTopic> {
     // Use CSV export URL - works for public sheets without API key
     const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch sheet data (${response.status}): ${response.statusText}`);
@@ -51,7 +51,13 @@ export class SheetsService {
         }
       }
       row.push(current);
-      result.push(row);
+      // Remove trailing empty strings (from trailing commas)
+      while (row.length > 0 && row[row.length - 1] === '') {
+        row.pop();
+      }
+      if (row.length > 0) {
+        result.push(row);
+      }
     }
 
     return result;
@@ -80,11 +86,20 @@ export class SheetsService {
       : trimmed;
 
     // Parse: "1,2,3" → [0,1,2] (convert 1-based to 0-based)
-    const indices = indicesOnly
+    const parsed = indicesOnly
       .split(',')
       .map(s => s.trim())
       .map(s => parseInt(s, 10))
-      .filter(n => !isNaN(n) && n >= 1 && n <= options.length)
+      .filter(n => !isNaN(n));
+
+    // Warn about out-of-bounds indices
+    const outOfBounds = parsed.filter(n => n < 1 || n > options.length);
+    if (outOfBounds.length > 0) {
+      console.warn(`Invalid answer indices [${outOfBounds.join(', ')}] - must be between 1 and ${options.length}`);
+    }
+
+    const indices = parsed
+      .filter(n => n >= 1 && n <= options.length)
       .map(n => n - 1);
 
     // Fallback to first option if parsing failed

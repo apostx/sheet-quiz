@@ -68,7 +68,10 @@ correct-indices-syntax: "1" for single-answer, "[1,2,3]" for multi-answer (1-bas
 answer-tracking: by-object-reference using Set for multi-select
 backward-compatibility: empty correctIndices defaults to "1" (first option, single-answer)
 
+# hooks
+useQuiz: quiz state management (current question, selection, scoring)
+useClickOutside: click-outside detection for tooltip auto-close
+
 # next-steps
-add vitest unit tests
-keyboard navigation support
-accessibility improvements (aria labels, screen reader support)
+add vitest unit tests (priority: shuffle.ts, url.ts, sheets.ts parsing)
+keyboard navigation support (escape to close tooltips, arrow keys for options)

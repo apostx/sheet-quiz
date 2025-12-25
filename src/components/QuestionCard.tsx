@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { QuizQuestion, QuizOption } from '../types/quiz';
 import { OptionButton } from './OptionButton';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 interface QuestionCardProps {
   question: QuizQuestion;
@@ -18,23 +19,8 @@ export const QuestionCard = ({
   const [showNoteTooltip, setShowNoteTooltip] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: Event) => {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
-        setShowNoteTooltip(false);
-      }
-    };
-
-    if (showNoteTooltip) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [showNoteTooltip]);
+  const closeTooltip = useCallback(() => setShowNoteTooltip(false), []);
+  useClickOutside(tooltipRef, showNoteTooltip, closeTooltip);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -49,6 +35,9 @@ export const QuestionCard = ({
                   e.stopPropagation();
                   setShowNoteTooltip(!showNoteTooltip);
                 }}
+                role="button"
+                aria-label="Show note"
+                aria-expanded={showNoteTooltip}
               >
                 ?
               </div>
@@ -65,7 +54,7 @@ export const QuestionCard = ({
         <div className="space-y-3">
           {question.options.map((option, index) => (
             <OptionButton
-              key={index}
+              key={`opt-${index}-${option.response.slice(0, 15)}`}
               option={option}
               isSelected={selectedOptions.has(option)}
               isAnswered={isAnswered}
