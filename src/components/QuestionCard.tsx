@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import type { QuizQuestion, QuizOption } from '../types/quiz';
 import { OptionButton } from './OptionButton';
+import { HtmlContent } from './HtmlContent';
 import { useClickOutside } from '../hooks/useClickOutside';
 
 interface QuestionCardProps {
@@ -41,11 +42,8 @@ export const QuestionCard = ({
               >
                 ?
               </div>
-              <div className={`absolute bottom-full right-0 mb-2 w-64 sm:w-80 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-10 ${showNoteTooltip ? 'block' : 'hidden group-hover:block'}`}>
-                <div className="relative">
-                  {question.note}
-                  <div className="absolute top-full right-4 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-gray-900"></div>
-                </div>
+              <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 max-h-[80vh] overflow-y-auto p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showNoteTooltip ? 'block' : 'hidden sm:group-hover:block'}`}>
+                <HtmlContent html={question.note} variant="tooltip" />
               </div>
             </div>
           )}

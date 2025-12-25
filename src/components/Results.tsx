@@ -1,4 +1,5 @@
 import type { QuizQuestion, QuizOption } from '../types/quiz';
+import { HtmlContent } from './HtmlContent';
 
 interface ResultsProps {
   score: number;
@@ -61,7 +62,11 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
                   <h4 className="font-bold text-base sm:text-lg mb-1">Question {index + 1}</h4>
                   <p className="text-gray-800 text-sm sm:text-base">{question.question}</p>
                   {question.note && (
-                    <p className="text-gray-600 text-xs sm:text-sm mt-2 italic">{question.note}</p>
+                    <HtmlContent
+                      html={question.note}
+                      variant="light"
+                      className="text-gray-600 text-xs sm:text-sm mt-2 italic"
+                    />
                   )}
                 </div>
               </div>
@@ -101,7 +106,11 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
                         </span>
                       </div>
                       {option.hint && (isCorrectAnswer || isUserAnswer) && (
-                        <div className="text-sm mt-1 text-gray-600">{option.hint}</div>
+                        <HtmlContent
+                          html={option.hint}
+                          variant="light"
+                          className="text-sm mt-1 text-gray-600"
+                        />
                       )}
                     </div>
                   );

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import type { QuizOption } from '../types/quiz';
 import { useClickOutside } from '../hooks/useClickOutside';
+import { HtmlContent } from './HtmlContent';
 
 interface OptionButtonProps {
   option: QuizOption;
@@ -105,11 +106,8 @@ export const OptionButton = ({
             >
               i
             </div>
-            <div className={`absolute bottom-full right-0 mb-2 w-56 sm:w-64 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-10 ${showHintTooltip ? 'block' : 'hidden group-hover:block'}`}>
-              <div className="relative">
-                {option.hint}
-                <div className="absolute top-full right-4 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-gray-900"></div>
-              </div>
+            <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-64 max-h-[80vh] overflow-y-auto p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showHintTooltip ? 'block' : 'hidden sm:group-hover:block'}`}>
+              <HtmlContent html={option.hint} variant="tooltip" />
             </div>
           </div>
         )}

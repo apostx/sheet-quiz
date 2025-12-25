@@ -38,7 +38,7 @@ read questions from public google sheets (csv-export)
 single-answer and multi-answer question support
 radio buttons for single-answer, checkboxes for multi-answer
 shuffled quiz options
-tooltip-based hints and notes with tap-to-toggle on mobile
+tooltip-based hints and notes with tap-to-toggle on mobile (supports HTML with links and images, fixed centered on mobile, absolute positioned on desktop)
 click-outside detection for tooltip auto-close
 detailed results review with partial selection indicators
 in-memory results calculation
@@ -67,10 +67,15 @@ row-format: question, note, correctIndices, option1-response, option1-hint, opti
 correct-indices-syntax: "1" for single-answer, "[1,2,3]" for multi-answer (1-based, brackets determine UI type)
 answer-tracking: by-object-reference using Set for multi-select
 backward-compatibility: empty correctIndices defaults to "1" (first option, single-answer)
+html-support: notes and hints support HTML content (links, images) via HtmlContent component with lightbox for images
 
 # hooks
 useQuiz: quiz state management (current question, selection, scoring)
 useClickOutside: click-outside detection for tooltip auto-close
+
+# shared-components
+HtmlContent: renders HTML with link/image styling, click-to-zoom images via Lightbox
+Lightbox: fullscreen image modal with escape-to-close
 
 # next-steps
 add vitest unit tests (priority: shuffle.ts, url.ts, sheets.ts parsing)
