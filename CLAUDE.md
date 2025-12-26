@@ -39,7 +39,7 @@ single-answer and multi-answer question support
 radio buttons for single-answer, checkboxes for multi-answer
 shuffled quiz options (per question)
 max param for limiting questions with random selection (persists on restart, re-randomizes on page reload)
-tooltip-based hints and notes with tap-to-toggle on mobile (supports HTML with links and images, fixed centered on mobile, absolute positioned on desktop)
+tooltip-based hints and notes with tap-to-toggle on mobile (supports HTML with links and images, fixed centered on mobile, absolute positioned on desktop, long URLs wrap properly)
 click-outside detection for tooltip auto-close
 detailed results review with partial selection indicators
 in-memory results calculation
@@ -58,8 +58,8 @@ context-format: flat-sections
 test-before-next-step: always verify build/tests pass
 scope: ask before multi-item work, default to smallest interpretation
 context-update: update and optimize context file after every finished request, never add implementation-status or completion tracking sections
-git-commits: use conventional commits format (feat/fix/docs/style/refactor/test/chore), do not add claude code signature or co-authored-by lines
-versioning: semantic versioning (MAJOR.MINOR.PATCH), bump MINOR for new features, PATCH for fixes, MAJOR for breaking changes
+git-commits: use conventional commits format (feat/fix/docs/style/refactor/test/chore), do not add claude code signature or co-authored-by lines, always bump version in package.json before committing code changes
+versioning: semantic versioning (MAJOR.MINOR.PATCH), bump MINOR for new features (feat:), PATCH for fixes (fix:), MAJOR for breaking changes, bump happens before commit as part of git workflow
 
 # url-params
 spreadsheetId: required, Google Sheets document ID

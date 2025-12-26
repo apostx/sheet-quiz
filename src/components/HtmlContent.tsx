@@ -21,15 +21,15 @@ export const HtmlContent = ({ html, className = '', variant = 'light' }: HtmlCon
   }, []);
 
   const baseStyles = variant === 'tooltip'
-    ? '[&_a]:text-blue-300 [&_a]:underline [&_a:hover]:text-blue-200'
-    : '[&_a]:text-blue-600 [&_a]:underline [&_a:hover]:text-blue-800';
+    ? '[&_a]:text-blue-300 [&_a]:underline [&_a:hover]:text-blue-200 [&_a]:break-words [&_a]:overflow-wrap-anywhere'
+    : '[&_a]:text-blue-600 [&_a]:underline [&_a:hover]:text-blue-800 [&_a]:break-words [&_a]:overflow-wrap-anywhere';
 
   const imgStyles = '[&_img]:max-w-full [&_img]:h-auto [&_img]:my-2 [&_img]:rounded [&_img]:cursor-zoom-in';
 
   return (
     <>
       <div
-        className={`${baseStyles} ${imgStyles} ${className}`}
+        className={`break-words ${baseStyles} ${imgStyles} ${className}`}
         dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleClick}
       />
