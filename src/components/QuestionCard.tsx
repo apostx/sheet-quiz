@@ -42,7 +42,7 @@ export const QuestionCard = ({
               >
                 ?
               </div>
-              <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 max-h-[80vh] overflow-y-auto p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showNoteTooltip ? 'block' : 'hidden sm:group-hover:block'}`}>
+              <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 max-h-[100vh] sm:max-h-[70vh] overflow-y-auto p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showNoteTooltip ? 'block' : 'hidden sm:group-hover:block'}`}>
                 <HtmlContent html={question.note} variant="tooltip" />
               </div>
             </div>

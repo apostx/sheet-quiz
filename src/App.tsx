@@ -1,7 +1,7 @@
-import { Quiz } from './components';
+import { Router } from './routes/Router';
 
 function App() {
-  return <Quiz />;
+  return <Router />;
 }
 
 export default App;
