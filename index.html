@@ -10,7 +10,8 @@
       (function() {
         var redirect = new URLSearchParams(window.location.search).get('redirect');
         if (redirect) {
-          history.replaceState(null, '', redirect);
+          // Prepend basename to maintain router compatibility
+          history.replaceState(null, '', '/sheet-quiz' + redirect);
         }
       })();
     </script>
