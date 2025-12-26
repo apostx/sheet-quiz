@@ -2,19 +2,57 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Sheet Quiz</title>
+    <title>Redirecting... - Sheet Quiz</title>
     <script type="text/javascript">
       // GitHub Pages SPA redirect workaround
-      // Redirects 404 to index.html with path preserved
-      var pathSegments = window.location.pathname.split('/').filter(Boolean);
-      var basePath = '/sheet-quiz/';
-      var route = pathSegments.slice(1).join('/'); // Remove 'sheet-quiz' prefix
+      (function() {
+        try {
+          var pathname = window.location.pathname;
+          console.log('[404] Original pathname:', pathname);
 
-      window.location.replace(
-        basePath + '?redirect=' + encodeURIComponent('/' + route + window.location.search)
-      );
+          // Split and clean path segments
+          var pathSegments = pathname.split('/').filter(Boolean);
+          console.log('[404] Path segments:', pathSegments);
+
+          // Remove 'sheet-quiz' prefix if present
+          if (pathSegments[0] === 'sheet-quiz') {
+            pathSegments.shift();
+          }
+
+          var route = pathSegments.join('/');
+          var search = window.location.search || '';
+
+          var redirectPath = '/' + route + search;
+          var redirectUrl = '/sheet-quiz/?redirect=' + encodeURIComponent(redirectPath);
+
+          console.log('[404] Redirecting to:', redirectUrl);
+
+          // Perform redirect
+          window.location.replace(redirectUrl);
+
+        } catch (error) {
+          console.error('[404] Redirect failed:', error);
+          document.write('<h1>Redirect Error</h1><pre>' + error + '</pre>');
+        }
+      })();
     </script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    </style>
   </head>
   <body>
+    <h1>Redirecting...</h1>
+    <p>If you are not redirected automatically, please check the browser console.</p>
+    <script>
+      // Fallback message after 3 seconds
+      setTimeout(function() {
+        document.body.innerHTML = '<h1>Redirect Failed</h1><p>Please navigate to <a href="/sheet-quiz/">Sheet Quiz</a> manually.</p>';
+      }, 3000);
+    </script>
   </body>
 </html>
