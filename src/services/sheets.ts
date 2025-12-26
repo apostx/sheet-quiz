@@ -3,7 +3,7 @@ import type { QuizQuestion, QuizOption, QuizTopic } from '../types/quiz';
 export class SheetsService {
   async fetchQuizTopic(spreadsheetId: string, sheetName: string, signal?: AbortSignal): Promise<QuizTopic> {
     // Use CSV export URL - works for public sheets without API key
-    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&headers=0`;
 
     const response = await fetch(url, { signal });
 
