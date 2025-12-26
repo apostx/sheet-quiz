@@ -40,6 +40,7 @@ public
 path-based routing (/, /:spreadsheetId/, /:spreadsheetId/:sheetName/)
 localstorage-based spreadsheet and sheet list management
 drag-and-drop reordering with mobile touch support
+share button with clipboard copy for exporting/importing lists via URL (base64-encoded JSON, auto-import on page load, silently skips duplicates)
 backward compatibility with old URL param format (auto-redirects to new routes)
 github pages spa support via 404.html redirect
 read questions from public google sheets (csv-export)
@@ -94,17 +95,18 @@ useClickOutside: click-outside detection for tooltip auto-close
 useLocalStorage: generic hook for localStorage state management with error handling
 useSpreadsheets: CRUD operations for spreadsheet list (add, remove, reorder)
 useSheets: CRUD operations for sheet list filtered by spreadsheetId (add, remove, reorder)
+useShareLink: share link state management with clipboard operations and visual feedback
 
 # shared-components
 HtmlContent: renders HTML with link/image styling, click-to-zoom images via Lightbox
 Lightbox: fullscreen image modal with escape-to-close
 ListManager: reusable add/delete/drag-reorder list component with mobile touch support
-SpreadsheetList: home page component for managing spreadsheet IDs
-SheetList: spreadsheet detail page for managing sheet names
+ShareButton: reusable share button with clipboard copy and "Copied!" feedback
+SpreadsheetList: home page component for managing spreadsheet IDs with share functionality
+SheetList: spreadsheet detail page for managing sheet names with share functionality
 QuizPage: quiz view component (renamed from Quiz, uses route params instead of URL params)
 
 # next-steps
-add vitest unit tests (priority: storage.ts, useLocalStorage.ts, useSpreadsheets.ts, useSheets.ts, shuffle.ts, url.ts, sheets.ts parsing)
+add vitest unit tests (priority: storage.ts, useLocalStorage.ts, useSpreadsheets.ts, useSheets.ts, shuffle.ts, url.ts, sheets.ts parsing, share.ts)
 keyboard navigation support (escape to close tooltips, arrow keys for options)
-storybook stories for ListManager, SpreadsheetList, SheetList components
-export/import feature for sharing saved spreadsheet and sheet lists with others (e.g., JSON export/import, shareable URLs)
+storybook stories for ListManager, SpreadsheetList, SheetList, ShareButton components
