@@ -10,6 +10,10 @@ import { STORAGE_KEYS, type StoredSheet } from '../types/storage';
 export const SheetList = () => {
   const { spreadsheetId } = useParams<{ spreadsheetId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const maxParam = searchParams.get('max');
+
+  // Helper to preserve max parameter in navigation links
+  const getSearchString = () => maxParam ? `?max=${maxParam}` : '';
 
   if (!spreadsheetId) {
     return (
@@ -81,7 +85,7 @@ export const SheetList = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-3xl mx-auto px-4 py-6">
           <nav className="mb-4">
-            <Link to="/" className="text-blue-600 hover:underline text-sm sm:text-base">
+            <Link to={`/${getSearchString()}`} className="text-blue-600 hover:underline text-sm sm:text-base">
               ← Back to Spreadsheets
             </Link>
           </nav>
@@ -108,7 +112,7 @@ export const SheetList = () => {
           emptyMessage="No saved sheets yet for this spreadsheet"
           renderItem={(item) => (
             <Link
-              to={`/${spreadsheetId}/${encodeURIComponent(item.name)}`}
+              to={`/${spreadsheetId}/${encodeURIComponent(item.name)}${getSearchString()}`}
               className="block hover:text-blue-600 transition-colors"
             >
               {item.name}

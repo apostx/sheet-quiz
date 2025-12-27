@@ -21,6 +21,10 @@ export const SpreadsheetList = () => {
   const { spreadsheets, add, remove, reorder } = useSpreadsheets();
   const [allSheets] = useLocalStorage<StoredSheet[]>(STORAGE_KEYS.SHEETS, []);
   const [searchParams, setSearchParams] = useSearchParams();
+  const maxParam = searchParams.get('max');
+
+  // Helper to preserve max parameter in navigation links
+  const getSearchString = () => maxParam ? `?max=${maxParam}` : '';
 
   // Import shared data on mount
   useEffect(() => {
@@ -121,7 +125,7 @@ export const SpreadsheetList = () => {
           emptyMessage="No saved spreadsheets yet"
           renderItem={(item) => (
             <Link
-              to={`/${item.id}`}
+              to={`/${item.id}${getSearchString()}`}
               className="block hover:text-blue-600 transition-colors"
             >
               {item.id}

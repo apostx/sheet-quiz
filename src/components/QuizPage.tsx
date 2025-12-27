@@ -14,6 +14,9 @@ export const QuizPage = () => {
   const [searchParams] = useSearchParams();
   const maxParam = searchParams.get('max');
 
+  // Helper to preserve max parameter in navigation links
+  const getSearchString = () => maxParam ? `?max=${maxParam}` : '';
+
   const [topic, setTopic] = useState<QuizTopic | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +101,7 @@ export const QuizPage = () => {
           </div>
           {spreadsheetId && (
             <Link
-              to={`/${spreadsheetId}`}
+              to={`/${spreadsheetId}${getSearchString()}`}
               className="block text-center text-blue-600 hover:underline"
             >
               ← Back to Sheet List
@@ -141,7 +144,7 @@ export const QuizPage = () => {
       <div className="max-w-4xl mx-auto mb-6">
         {spreadsheetId && (
           <nav className="mb-4">
-            <Link to={`/${spreadsheetId}`} className="text-blue-600 hover:underline text-sm sm:text-base">
+            <Link to={`/${spreadsheetId}${getSearchString()}`} className="text-blue-600 hover:underline text-sm sm:text-base">
               ← Back to Sheet List
             </Link>
           </nav>
