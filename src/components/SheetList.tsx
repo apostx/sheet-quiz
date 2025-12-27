@@ -113,7 +113,7 @@ export const SheetList = () => {
           renderItem={(item) => (
             <Link
               to={`/${spreadsheetId}/${encodeURIComponent(item.name)}${getSearchString()}`}
-              className="block hover:text-blue-600 transition-colors"
+              className="block hover:text-blue-600 transition-colors break-words"
             >
               {item.name}
             </Link>

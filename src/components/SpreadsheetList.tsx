@@ -126,7 +126,7 @@ export const SpreadsheetList = () => {
           renderItem={(item) => (
             <Link
               to={`/${item.id}${getSearchString()}`}
-              className="block hover:text-blue-600 transition-colors"
+              className="block hover:text-blue-600 transition-colors break-all"
             >
               {item.id}
             </Link>
