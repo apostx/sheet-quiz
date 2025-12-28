@@ -107,9 +107,7 @@ SheetList: spreadsheet detail page for managing sheet names with share functiona
 QuizPage: quiz view component (renamed from Quiz, uses route params instead of URL params)
 
 # next-steps
-add vitest unit tests (priority: storage.ts, useLocalStorage.ts, useSpreadsheets.ts, useSheets.ts, shuffle.ts, url.ts, sheets.ts parsing, share.ts)
-keyboard navigation support (escape to close tooltips, arrow keys for options)
-storybook stories for ListManager, SpreadsheetList, SheetList, ShareButton components
+(none)
 
 # file-index
 entry-points:
