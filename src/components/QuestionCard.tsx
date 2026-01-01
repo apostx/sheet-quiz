@@ -42,8 +42,22 @@ export const QuestionCard = ({
               >
                 ?
               </div>
-              <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 max-h-[90vh] sm:max-h-[70vh] overflow-y-auto p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showNoteTooltip ? 'block' : 'hidden sm:group-hover:block'}`}>
-                <HtmlContent html={question.note} variant="tooltip" />
+              <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 sm:max-h-[70vh] flex flex-col bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showNoteTooltip ? 'flex' : 'hidden sm:group-hover:block'}`}>
+                <button
+                  className="flex-shrink-0 self-end m-2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white sm:hidden"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNoteTooltip(false);
+                  }}
+                  aria-label="Close note"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <div className="overflow-y-auto px-3 pb-3 sm:p-3">
+                  <HtmlContent html={question.note} variant="tooltip" />
+                </div>
               </div>
             </div>
           )}
