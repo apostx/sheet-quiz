@@ -42,7 +42,7 @@ export const QuestionCard = ({
               >
                 ?
               </div>
-              <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 sm:max-h-[70vh] flex flex-col bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showNoteTooltip ? 'flex' : 'hidden sm:group-hover:block'}`}>
+              <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 sm:max-h-[70vh] flex flex-col bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showNoteTooltip ? 'flex' : 'hidden sm:group-hover:flex'}`}>
                 <button
                   className="flex-shrink-0 self-end m-2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white sm:hidden"
                   onClick={(e) => {
