@@ -50,7 +50,7 @@ export const OptionButton = ({
     <button
       onClick={onClick}
       disabled={isAnswered}
-      className={getButtonClass()}
+      className={`${getButtonClass()} ${isAnswered ? 'pointer-events-none' : ''}`}
       role={isMultiAnswer ? 'checkbox' : 'radio'}
       aria-checked={isSelected}
       aria-disabled={isAnswered}

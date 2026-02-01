@@ -33,3 +33,9 @@ storybook-static
 # Playwright
 playwright-report/
 test-results/
+# Quiz data files
+questions/**/*.json
+questions/**/*.tsv
+
+# Conversion scripts
+scripts/convert-json-to-tsv.ts
