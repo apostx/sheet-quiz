@@ -12,13 +12,13 @@ An interactive quiz application that reads questions directly from public Google
 See a sample quiz in action:
 
 ```
-https://apostx.github.io/sheet-quiz/?spreadsheetId=1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg&sheet=1%20-%20What%20is%20Cloud%20Computing
+https://apostx.github.io/sheet-quiz/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/
 ```
 
-Or try it locally:
+Or limit to 5 random questions:
 
 ```
-http://localhost:5173/?spreadsheetId=1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg&sheet=1%20-%20What%20is%20Cloud%20Computing
+https://apostx.github.io/sheet-quiz/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/?max=5
 ```
 
 ## Features
@@ -26,7 +26,10 @@ http://localhost:5173/?spreadsheetId=1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcM
 - ✅ **Google Sheets Integration** - Load questions from any public Google Sheet
 - ✅ **Single & Multi-Answer Questions** - Radio buttons for single-select, checkboxes for multi-select
 - ✅ **Shuffled Options** - Randomize answer order for each quiz session
-- ✅ **Hints & Notes** - Add tooltips and context to questions and answers
+- ✅ **Question Limit** - Use `?max=N` to practice with a random subset of questions
+- ✅ **Hints & Notes** - Add tooltips and context to questions and answers (supports HTML)
+- ✅ **List Management** - Save, organize, and reorder spreadsheets/sheets with drag-and-drop
+- ✅ **Share Lists** - Export/import your quiz collections via shareable URLs
 - ✅ **Detailed Results** - Review all questions with correct/incorrect indicators
 - ✅ **Zero Backend** - Runs entirely in the browser, no server required
 - ✅ **Mobile Responsive** - Works on desktop, tablet, and mobile devices
@@ -86,15 +89,30 @@ https://docs.google.com/spreadsheets/d/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQv
 
 Format:
 ```
-https://apostx.github.io/sheet-quiz/?spreadsheetId=YOUR_SPREADSHEET_ID&sheet=YOUR_SHEET_NAME
+https://apostx.github.io/sheet-quiz/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/
 ```
 
 Example:
 ```
-https://apostx.github.io/sheet-quiz/?spreadsheetId=1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg&sheet=1%20-%20What%20is%20Cloud%20Computing
+https://apostx.github.io/sheet-quiz/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/
 ```
 
 **Note**: URL-encode the sheet name (spaces become `%20`)
+
+## URL Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `max` | Limit quiz to N random questions | `?max=10` |
+
+Example with max parameter:
+```
+https://apostx.github.io/sheet-quiz/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/?max=10
+```
+
+The `max` parameter persists across quiz restarts but re-randomizes question selection on page reload.
+
+**Legacy URL format**: The old query param format (`?spreadsheetId=...&sheet=...`) is still supported and automatically redirects to the new path-based format.
 
 ## Local Development
 
@@ -117,7 +135,7 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173/?spreadsheetId=YOUR_ID&sheet=YOUR_SHEET` to test your quiz.
+Visit `http://localhost:5173/sheet-quiz/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/` to test your quiz.
 
 ### Available Scripts
 
@@ -158,12 +176,14 @@ sheet-quiz/
 
 ## How It Works
 
-1. **URL Parsing**: Extracts `spreadsheetId` and `sheet` from URL parameters
-2. **CSV Fetch**: Fetches the published Google Sheet as CSV via public URL
-3. **Parsing**: Parses CSV rows into question objects with correct answer tracking
-4. **Shuffling**: Randomizes option order while maintaining correct answer references
-5. **Quiz Flow**: Manages question navigation, answer selection, and scoring
-6. **Results**: Shows detailed review with correct/incorrect indicators
+1. **Routing**: Path-based URLs (`/:spreadsheetId/:sheetName/`) with optional `max` query param
+2. **List Management**: Save and organize spreadsheets/sheets locally with drag-and-drop reordering
+3. **Sharing**: Export/import lists via shareable URLs (base64-encoded, auto-imports on load)
+4. **CSV Fetch**: Fetches the published Google Sheet as CSV via public URL
+5. **Parsing**: Parses CSV rows into question objects with correct answer tracking
+6. **Shuffling**: Randomizes option order while maintaining correct answer references
+7. **Quiz Flow**: Manages question navigation, answer selection, and scoring
+8. **Results**: Shows detailed review with correct/incorrect indicators
 
 ## Deployment
 
