@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { QuizOption } from '../types/quiz';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { HtmlContent } from './HtmlContent';
@@ -20,11 +20,29 @@ export const OptionButton = ({
   isMultiAnswer,
   onClick,
 }: OptionButtonProps) => {
-  const [showHintTooltip, setShowHintTooltip] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const isLockedRef = useRef(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const scrollContentRef = useRef<HTMLDivElement>(null);
 
-  const closeTooltip = useCallback(() => setShowHintTooltip(false), []);
-  useClickOutside(tooltipRef, showHintTooltip, closeTooltip);
+  const closeTooltip = useCallback(() => {
+    setIsOpen(false);
+    isLockedRef.current = false;
+  }, []);
+  useClickOutside(tooltipRef, isOpen, closeTooltip);
+
+  const resetScroll = useCallback(() => {
+    if (scrollContentRef.current) {
+      scrollContentRef.current.scrollTop = 0;
+    }
+  }, []);
+
+  // Reset scroll position when tooltip opens
+  useEffect(() => {
+    if (isOpen) {
+      resetScroll();
+    }
+  }, [isOpen, resetScroll]);
 
   const getButtonClass = () => {
     const base = 'w-full p-3 sm:p-4 text-left rounded-lg border-2 transition-all';
@@ -88,35 +106,57 @@ export const OptionButton = ({
           <div className="font-medium text-sm sm:text-base">{option.response}</div>
         </div>
         {option.hint && (
-          <div ref={tooltipRef} className="relative group flex-shrink-0 pointer-events-auto">
+          <div
+            ref={tooltipRef}
+            className="relative flex-shrink-0 pointer-events-auto"
+            onMouseEnter={() => {
+              if (!isOpen) {
+                resetScroll();
+                setIsOpen(true);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!isLockedRef.current) {
+                setIsOpen(false);
+              }
+            }}
+          >
             <div
               className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
-                setShowHintTooltip(!showHintTooltip);
+                if (!isOpen) {
+                  resetScroll();
+                  setIsOpen(true);
+                }
+                isLockedRef.current = true;
               }}
               onTouchEnd={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                setShowHintTooltip(!showHintTooltip);
+                if (!isOpen) {
+                  resetScroll();
+                  setIsOpen(true);
+                }
+                isLockedRef.current = true;
               }}
               role="button"
               aria-label="Show hint"
-              aria-expanded={showHintTooltip}
+              aria-expanded={isOpen}
             >
               i
             </div>
-            <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-64 sm:max-h-[80vh] flex flex-col bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${showHintTooltip ? 'flex' : 'hidden sm:group-hover:flex'}`}>
+            <div className={`fixed sm:absolute inset-4 sm:inset-auto sm:top-full sm:right-0 sm:mt-2 sm:w-64 sm:max-h-[80vh] flex flex-col bg-gray-900 text-white text-sm rounded-lg shadow-lg z-50 ${isOpen ? 'flex' : 'hidden'}`}>
               <div
                 className="flex-shrink-0 self-end m-2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white sm:hidden cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowHintTooltip(false);
+                  closeTooltip();
                 }}
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  setShowHintTooltip(false);
+                  closeTooltip();
                 }}
                 role="button"
                 aria-label="Close hint"
@@ -125,7 +165,7 @@ export const OptionButton = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
-              <div className="overflow-y-auto px-3 pb-3 sm:p-3">
+              <div ref={scrollContentRef} className="overflow-y-auto px-3 pb-3 sm:p-3">
                 <HtmlContent html={option.hint} variant="tooltip" />
               </div>
             </div>
