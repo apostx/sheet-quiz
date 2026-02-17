@@ -103,7 +103,9 @@ export const OptionButton = ({
               </div>
             )}
           </div>
-          <div className="font-medium text-sm sm:text-base">{option.response}</div>
+          <div className="font-medium text-sm sm:text-base">
+            <HtmlContent html={option.response} variant="light" />
+          </div>
         </div>
         {option.hint && (
           <div

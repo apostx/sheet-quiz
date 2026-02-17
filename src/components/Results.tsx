@@ -60,7 +60,9 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
                 </div>
                 <div className="flex-1">
                   <h4 className="font-bold text-base sm:text-lg mb-1">Question {index + 1}</h4>
-                  <p className="text-gray-800 text-sm sm:text-base">{question.question}</p>
+                  <div className="text-gray-800 text-sm sm:text-base">
+                    <HtmlContent html={question.question} variant="light" />
+                  </div>
                   {question.note && (
                     <HtmlContent
                       html={question.note}
@@ -102,7 +104,7 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
                           </span>
                         )}
                         <span className={label ? 'font-medium' : ''}>
-                          {option.response}
+                          <HtmlContent html={option.response} variant="light" />
                         </span>
                       </div>
                       {option.hint && (isCorrectAnswer || isUserAnswer) && (

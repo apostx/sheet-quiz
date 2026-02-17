@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { createSheetsService } from '../services';
+import { HtmlContent } from './HtmlContent';
 import type { QuizTopic } from '../types/quiz';
 
 export const SearchPage = () => {
@@ -112,7 +113,9 @@ export const SearchPage = () => {
             <div key={index} className="bg-white rounded-lg shadow p-4 sm:p-6">
               <div className="flex items-start gap-2 mb-3">
                 <span className="text-sm text-gray-400 font-mono mt-1">#{index + 1}</span>
-                <h2 className="text-base sm:text-lg font-semibold flex-1">{question.question}</h2>
+                <h2 className="text-base sm:text-lg font-semibold flex-1">
+                  <HtmlContent html={question.question} variant="light" />
+                </h2>
                 {question.isMultiAnswer && (
                   <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded flex-shrink-0">
                     Multi
@@ -127,7 +130,9 @@ export const SearchPage = () => {
                     className="flex items-start gap-2 px-3 py-2 rounded text-sm sm:text-base bg-green-50 border border-green-300 text-green-900"
                   >
                     <span className="mt-0.5 flex-shrink-0 text-green-600">✓</span>
-                    <span className="flex-1">{option.response}</span>
+                    <span className="flex-1">
+                      <HtmlContent html={option.response} variant="light" />
+                    </span>
                   </div>
                 ))}
               </div>
