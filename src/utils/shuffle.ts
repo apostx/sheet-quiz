@@ -1,4 +1,4 @@
-import type { QuizOption } from '../types/quiz';
+import type { QuizOption, QuizTopic } from '../types/quiz';
 
 export const createSeededRandom = (seed: number) => {
   // mulberry32 PRNG — deterministic random from seed
@@ -21,4 +21,21 @@ export const shuffleArray = <T>(array: T[], random = Math.random): T[] => {
 
 export const shuffleOptions = (options: QuizOption[], random = Math.random): QuizOption[] => {
   return shuffleArray(options, random);
+};
+
+/** Apply seeded shuffle to questions (max selection) and all option orders */
+export const shuffleTopicWithSeed = (topic: QuizTopic, seed: number, max?: number): QuizTopic => {
+  const random = createSeededRandom(seed);
+
+  let questions = topic.questions;
+  if (max && max > 0 && max < questions.length) {
+    questions = shuffleArray(questions, random).slice(0, max);
+  }
+
+  const shuffledQuestions = questions.map(question => ({
+    ...question,
+    options: shuffleArray(question.options, random),
+  }));
+
+  return { ...topic, questions: shuffledQuestions };
 };

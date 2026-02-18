@@ -1,39 +1,21 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { QuestionCard } from './QuestionCard';
-import { Results } from './Results';
 import { useQuiz } from '../hooks/useQuiz';
 import type { QuizInitialState } from '../hooks/useQuiz';
 import { useSpreadsheets } from '../hooks/useSpreadsheets';
 import { useSheets } from '../hooks/useSheets';
 import { createSheetsService } from '../services';
-import { createSeededRandom, shuffleArray, encodeQuizHash, parseQuizHash } from '../utils';
+import { shuffleTopicWithSeed, encodeQuizHash, parseQuizHash } from '../utils';
 import type { QuizTopic } from '../types/quiz';
 
 const generateSeed = () => Math.floor(Math.random() * 0x7FFFFFFF);
-
-/** Apply seeded shuffle to questions (max selection) and all option orders */
-const shuffleTopicWithSeed = (topic: QuizTopic, seed: number, max?: number): QuizTopic => {
-  const random = createSeededRandom(seed);
-
-  let questions = topic.questions;
-  if (max && max > 0 && max < questions.length) {
-    questions = shuffleArray(questions, random).slice(0, max);
-  }
-
-  // Shuffle options for each question using the same PRNG sequence
-  const shuffledQuestions = questions.map(question => ({
-    ...question,
-    options: shuffleArray(question.options, random),
-  }));
-
-  return { ...topic, questions: shuffledQuestions };
-};
 
 export const QuizPage = () => {
   const { spreadsheetId, sheetName } = useParams<{ spreadsheetId: string; sheetName: string }>();
   const [searchParams] = useSearchParams();
   const maxParam = searchParams.get('max');
+  const navigate = useNavigate();
 
   const getSearchString = () => maxParam ? `?max=${maxParam}` : '';
 
@@ -74,10 +56,7 @@ export const QuizPage = () => {
         // If restoring from hash, build initial state
         if (hashState) {
           setInitialState({
-            currentQuestionIndex: Math.min(hashState.currentQuestionIndex, shuffledTopic.questions.length - 1),
             answers: hashState.answers,
-            currentSelections: hashState.currentSelections,
-            showResult: hashState.showResult,
           });
         }
 
@@ -110,6 +89,13 @@ export const QuizPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]);
 
+  // Auto-redirect to results when all questions are answered (e.g. after page reload)
+  useEffect(() => {
+    if (topic && !quiz.currentQuestion && quiz.totalQuestions > 0) {
+      navigate(`/${spreadsheetId}/${sheetName}/results${getSearchString()}${window.location.hash}`, { replace: true });
+    }
+  }, [topic, quiz.currentQuestion, quiz.totalQuestions, spreadsheetId, sheetName, navigate]);
+
   // Sync quiz state to URL hash
   useEffect(() => {
     if (!topic || !seedRef.current) return;
@@ -128,40 +114,18 @@ export const QuizPage = () => {
       if (optIndices.size > 0) answers.set(qIdx, optIndices);
     }
 
-    // Convert current selections to option indices
-    const currentSelections = new Set<number>();
-    const currentQ = questions[quiz.currentQuestionIndex];
-    if (currentQ && !quiz.isAnswered) {
-      for (const opt of quiz.selectedOptions) {
-        const idx = currentQ.options.indexOf(opt);
-        if (idx >= 0) currentSelections.add(idx);
-      }
-    }
-
     const hash = encodeQuizHash({
       seed: seedRef.current,
-      currentQuestionIndex: quiz.currentQuestionIndex,
       answers,
-      currentSelections,
-      showResult: quiz.showResult,
     });
 
     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
-  }, [topic, quiz.currentQuestionIndex, quiz.selectedOptions, quiz.userAnswers, quiz.isAnswered, quiz.showResult]);
+  }, [topic, quiz.userAnswers]);
 
-  // Handle restart: new seed, new shuffle
-  const handleRestart = useCallback(() => {
-    if (!topic) return;
-
-    const newSeed = generateSeed();
-    seedRef.current = newSeed;
-
-    // Re-fetch isn't needed — re-shuffle the original data
-    // But we don't have the original unsorted data anymore.
-    // Simplest: reload the page without hash to get a fresh quiz
-    window.location.hash = '';
-    window.location.reload();
-  }, [topic]);
+  // Navigate to results route when quiz is complete
+  const handleViewResults = () => {
+    navigate(`/${spreadsheetId}/${sheetName}/results${getSearchString()}${window.location.hash}`);
+  };
 
   if (loading) {
     return (
@@ -192,31 +156,8 @@ export const QuizPage = () => {
     );
   }
 
-  if (!topic) {
+  if (!topic || !quiz.currentQuestion) {
     return null;
-  }
-
-  if (quiz.showResult) {
-    return (
-      <div className="min-h-screen p-4 bg-gray-100">
-        <Results
-          score={quiz.score}
-          total={quiz.totalQuestions}
-          topicName={topic.name}
-          questions={quiz.questions}
-          userAnswers={quiz.userAnswers}
-          onRestart={handleRestart}
-        />
-      </div>
-    );
-  }
-
-  if (!quiz.currentQuestion) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">No questions available</div>
-      </div>
-    );
   }
 
   return (
@@ -266,7 +207,7 @@ export const QuizPage = () => {
 
         {quiz.isAnswered && (
           <button
-            onClick={quiz.nextQuestion}
+            onClick={quiz.isLastQuestion ? handleViewResults : quiz.nextQuestion}
             className="px-4 py-3 sm:px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             {quiz.isLastQuestion ? 'View Results' : 'Next Question'}

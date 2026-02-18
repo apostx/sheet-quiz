@@ -21,8 +21,9 @@
 
           var route = pathSegments.join('/');
           var search = window.location.search || '';
+          var hash = window.location.hash || '';
 
-          var redirectPath = '/' + route + search;
+          var redirectPath = '/' + route + search + hash;
           var redirectUrl = '/sheet-quiz/?redirect=' + encodeURIComponent(redirectPath);
 
           console.log('[404] Redirecting to:', redirectUrl);

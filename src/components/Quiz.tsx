@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { QuestionCard } from './QuestionCard';
-import { Results } from './Results';
 import { useQuiz } from '../hooks/useQuiz';
 import { createSheetsService } from '../services';
 import { getQuizParams, shuffleArray } from '../utils';
@@ -76,21 +75,6 @@ export const Quiz = () => {
 
   if (!topic) {
     return null;
-  }
-
-  if (quiz.showResult) {
-    return (
-      <div className="min-h-screen p-4 bg-gray-100">
-        <Results
-          score={quiz.score}
-          total={quiz.totalQuestions}
-          topicName={topic.name}
-          questions={quiz.questions}
-          userAnswers={quiz.userAnswers}
-          onRestart={quiz.restart}
-        />
-      </div>
-    );
   }
 
   if (!quiz.currentQuestion) {

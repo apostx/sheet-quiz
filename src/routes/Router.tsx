@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { SpreadsheetList } from '../components/SpreadsheetList';
 import { SheetList } from '../components/SheetList';
 import { QuizPage } from '../components/QuizPage';
+import { ResultsPage } from '../components/ResultsPage';
 import { SearchPage } from '../components/SearchPage';
 import { RedirectLegacy } from './RedirectLegacy';
 
@@ -18,6 +19,10 @@ const router = createBrowserRouter(
     {
       path: '/:spreadsheetId/:sheetName/search',
       element: <SearchPage />,
+    },
+    {
+      path: '/:spreadsheetId/:sheetName/results',
+      element: <ResultsPage />,
     },
     {
       path: '/:spreadsheetId/:sheetName',

@@ -64,11 +64,14 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
                     <HtmlContent html={question.question} variant="light" />
                   </div>
                   {question.note && (
-                    <HtmlContent
-                      html={question.note}
-                      variant="light"
-                      className="text-gray-600 text-xs sm:text-sm mt-2 italic"
-                    />
+                    <div className="mt-3 pt-2 border-t border-gray-200">
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Explanation</span>
+                      <HtmlContent
+                        html={question.note}
+                        variant="light"
+                        className="text-gray-600 text-xs sm:text-sm mt-1"
+                      />
+                    </div>
                   )}
                 </div>
               </div>

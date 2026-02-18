@@ -6,4 +6,5 @@ export { ListManager } from './ListManager';
 export { SpreadsheetList } from './SpreadsheetList';
 export { SheetList } from './SheetList';
 export { ShareButton } from './ShareButton';
+export { ResultsPage } from './ResultsPage';
 export { SearchPage } from './SearchPage';

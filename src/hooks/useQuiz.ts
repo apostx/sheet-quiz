@@ -7,28 +7,23 @@ interface QuizState {
   answeredQuestions: Set<number>;
   correctAnswers: Set<number>;
   userAnswers: Map<number, Set<QuizOption>>;
-  showResult: boolean;
 }
 
 export interface QuizInitialState {
-  currentQuestionIndex: number;
   answers: Map<number, Set<number>>; // questionIndex → Set<optionIndex>
-  currentSelections: Set<number>; // option indices for current question
-  showResult: boolean;
 }
 
 const buildInitialState = (
   topic: QuizTopic,
   initial?: QuizInitialState,
 ): QuizState => {
-  if (!initial || initial.answers.size === 0 && initial.currentSelections.size === 0 && !initial.showResult) {
+  if (!initial || initial.answers.size === 0) {
     return {
-      currentQuestionIndex: initial?.currentQuestionIndex ?? 0,
+      currentQuestionIndex: 0,
       selectedOptions: new Set(),
       answeredQuestions: new Set(),
       correctAnswers: new Set(),
       userAnswers: new Map(),
-      showResult: false,
     };
   }
 
@@ -53,7 +48,6 @@ const buildInitialState = (
       answeredQuestions.add(qIdx);
       userAnswers.set(qIdx, selectedOpts);
 
-      // Recompute correctness
       const isCorrect =
         selectedOpts.size === question.correctOptions.length &&
         question.correctOptions.every(opt => selectedOpts.has(opt));
@@ -63,24 +57,15 @@ const buildInitialState = (
     }
   }
 
-  // Restore current selections
-  const selectedOptions = new Set<QuizOption>();
-  const currentQ = questions[initial.currentQuestionIndex];
-  if (currentQ && initial.currentSelections.size > 0) {
-    for (const optIdx of initial.currentSelections) {
-      if (optIdx < currentQ.options.length) {
-        selectedOptions.add(currentQ.options[optIdx]);
-      }
-    }
-  }
+  // Current question = next unanswered (i.e. count of answered questions)
+  const currentQuestionIndex = answeredQuestions.size;
 
   return {
-    currentQuestionIndex: initial.currentQuestionIndex,
-    selectedOptions,
+    currentQuestionIndex,
+    selectedOptions: new Set(),
     answeredQuestions,
     correctAnswers,
     userAnswers,
-    showResult: initial.showResult,
   };
 };
 
@@ -94,7 +79,6 @@ export const useQuiz = (topic: QuizTopic | null, initialState?: QuizInitialState
     answeredQuestions: new Set<number>(),
     correctAnswers: new Set<number>(),
     userAnswers: new Map<number, Set<QuizOption>>(),
-    showResult: false,
   });
 
   // Initialize/reinitialize state when topic becomes available
@@ -156,15 +140,11 @@ export const useQuiz = (topic: QuizTopic | null, initialState?: QuizInitialState
   };
 
   const nextQuestion = () => {
-    if (isLastQuestion) {
-      setState(prev => ({ ...prev, showResult: true }));
-    } else {
-      setState(prev => ({
-        ...prev,
-        currentQuestionIndex: prev.currentQuestionIndex + 1,
-        selectedOptions: new Set(),
-      }));
-    }
+    setState(prev => ({
+      ...prev,
+      currentQuestionIndex: prev.currentQuestionIndex + 1,
+      selectedOptions: new Set(),
+    }));
   };
 
   const restart = () => {
@@ -174,7 +154,6 @@ export const useQuiz = (topic: QuizTopic | null, initialState?: QuizInitialState
       answeredQuestions: new Set(),
       correctAnswers: new Set(),
       userAnswers: new Map(),
-      showResult: false,
     });
   };
 
@@ -188,7 +167,6 @@ export const useQuiz = (topic: QuizTopic | null, initialState?: QuizInitialState
     selectedOptions: state.selectedOptions,
     isAnswered,
     isLastQuestion,
-    showResult: state.showResult,
     score,
     userAnswers: state.userAnswers,
     questions,
