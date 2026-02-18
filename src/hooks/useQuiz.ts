@@ -1,6 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { QuizOption, QuizTopic } from '../types/quiz';
-import { shuffleOptions } from '../utils';
 
 interface QuizState {
   currentQuestionIndex: number;
@@ -11,26 +10,105 @@ interface QuizState {
   showResult: boolean;
 }
 
-export const useQuiz = (topic: QuizTopic | null) => {
+export interface QuizInitialState {
+  currentQuestionIndex: number;
+  answers: Map<number, Set<number>>; // questionIndex → Set<optionIndex>
+  currentSelections: Set<number>; // option indices for current question
+  showResult: boolean;
+}
+
+const buildInitialState = (
+  topic: QuizTopic,
+  initial?: QuizInitialState,
+): QuizState => {
+  if (!initial || initial.answers.size === 0 && initial.currentSelections.size === 0 && !initial.showResult) {
+    return {
+      currentQuestionIndex: initial?.currentQuestionIndex ?? 0,
+      selectedOptions: new Set(),
+      answeredQuestions: new Set(),
+      correctAnswers: new Set(),
+      userAnswers: new Map(),
+      showResult: false,
+    };
+  }
+
+  const questions = topic.questions;
+  const answeredQuestions = new Set<number>();
+  const correctAnswers = new Set<number>();
+  const userAnswers = new Map<number, Set<QuizOption>>();
+
+  // Restore answers by mapping option indices back to object references
+  for (const [qIdx, optIndices] of initial.answers) {
+    if (qIdx >= questions.length) continue;
+    const question = questions[qIdx];
+    const selectedOpts = new Set<QuizOption>();
+
+    for (const optIdx of optIndices) {
+      if (optIdx < question.options.length) {
+        selectedOpts.add(question.options[optIdx]);
+      }
+    }
+
+    if (selectedOpts.size > 0) {
+      answeredQuestions.add(qIdx);
+      userAnswers.set(qIdx, selectedOpts);
+
+      // Recompute correctness
+      const isCorrect =
+        selectedOpts.size === question.correctOptions.length &&
+        question.correctOptions.every(opt => selectedOpts.has(opt));
+      if (isCorrect) {
+        correctAnswers.add(qIdx);
+      }
+    }
+  }
+
+  // Restore current selections
+  const selectedOptions = new Set<QuizOption>();
+  const currentQ = questions[initial.currentQuestionIndex];
+  if (currentQ && initial.currentSelections.size > 0) {
+    for (const optIdx of initial.currentSelections) {
+      if (optIdx < currentQ.options.length) {
+        selectedOptions.add(currentQ.options[optIdx]);
+      }
+    }
+  }
+
+  return {
+    currentQuestionIndex: initial.currentQuestionIndex,
+    selectedOptions,
+    answeredQuestions,
+    correctAnswers,
+    userAnswers,
+    showResult: initial.showResult,
+  };
+};
+
+export const useQuiz = (topic: QuizTopic | null, initialState?: QuizInitialState) => {
+  const initialStateRef = useRef(initialState);
+  initialStateRef.current = initialState;
+
   const [state, setState] = useState<QuizState>({
     currentQuestionIndex: 0,
-    selectedOptions: new Set(),
-    answeredQuestions: new Set(),
-    correctAnswers: new Set(),
-    userAnswers: new Map(),
+    selectedOptions: new Set<QuizOption>(),
+    answeredQuestions: new Set<number>(),
+    correctAnswers: new Set<number>(),
+    userAnswers: new Map<number, Set<QuizOption>>(),
     showResult: false,
   });
 
-  const shuffledQuestions = useMemo(() => {
-    if (!topic) return [];
-    return topic.questions.map(question => ({
-      ...question,
-      options: shuffleOptions(question.options),
-    }));
+  // Initialize/reinitialize state when topic becomes available
+  useEffect(() => {
+    if (topic) {
+      setState(buildInitialState(topic, initialStateRef.current));
+      initialStateRef.current = undefined; // Only apply initial state once
+    }
   }, [topic]);
 
-  const currentQuestion = shuffledQuestions[state.currentQuestionIndex] || null;
-  const totalQuestions = shuffledQuestions.length;
+  // Questions are already shuffled by QuizPage — use directly
+  const questions = topic?.questions ?? [];
+  const currentQuestion = questions[state.currentQuestionIndex] || null;
+  const totalQuestions = questions.length;
   const isLastQuestion = state.currentQuestionIndex === totalQuestions - 1;
 
   const selectOption = (option: QuizOption) => {
@@ -38,14 +116,12 @@ export const useQuiz = (topic: QuizTopic | null) => {
       const newSelected = new Set(prev.selectedOptions);
 
       if (currentQuestion?.isMultiAnswer) {
-        // Multi-answer: toggle selection
         if (newSelected.has(option)) {
           newSelected.delete(option);
         } else {
           newSelected.add(option);
         }
       } else {
-        // Single-answer: replace selection
         newSelected.clear();
         newSelected.add(option);
       }
@@ -57,7 +133,6 @@ export const useQuiz = (topic: QuizTopic | null) => {
   const submitAnswer = () => {
     if (state.selectedOptions.size === 0 || !currentQuestion) return;
 
-    // Check exact match: all correct selected, no incorrect selected
     const isCorrect =
       state.selectedOptions.size === currentQuestion.correctOptions.length &&
       currentQuestion.correctOptions.every(opt => state.selectedOptions.has(opt));
@@ -116,7 +191,7 @@ export const useQuiz = (topic: QuizTopic | null) => {
     showResult: state.showResult,
     score,
     userAnswers: state.userAnswers,
-    shuffledQuestions,
+    questions,
     selectOption,
     submitAnswer,
     nextQuestion,

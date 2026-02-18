@@ -85,7 +85,7 @@ export const Quiz = () => {
           score={quiz.score}
           total={quiz.totalQuestions}
           topicName={topic.name}
-          questions={quiz.shuffledQuestions}
+          questions={quiz.questions}
           userAnswers={quiz.userAnswers}
           onRestart={quiz.restart}
         />

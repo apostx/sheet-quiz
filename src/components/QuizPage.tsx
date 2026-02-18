@@ -1,27 +1,49 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { QuestionCard } from './QuestionCard';
 import { Results } from './Results';
 import { useQuiz } from '../hooks/useQuiz';
+import type { QuizInitialState } from '../hooks/useQuiz';
 import { useSpreadsheets } from '../hooks/useSpreadsheets';
 import { useSheets } from '../hooks/useSheets';
 import { createSheetsService } from '../services';
-import { shuffleArray } from '../utils';
+import { createSeededRandom, shuffleArray, encodeQuizHash, parseQuizHash } from '../utils';
 import type { QuizTopic } from '../types/quiz';
+
+const generateSeed = () => Math.floor(Math.random() * 0x7FFFFFFF);
+
+/** Apply seeded shuffle to questions (max selection) and all option orders */
+const shuffleTopicWithSeed = (topic: QuizTopic, seed: number, max?: number): QuizTopic => {
+  const random = createSeededRandom(seed);
+
+  let questions = topic.questions;
+  if (max && max > 0 && max < questions.length) {
+    questions = shuffleArray(questions, random).slice(0, max);
+  }
+
+  // Shuffle options for each question using the same PRNG sequence
+  const shuffledQuestions = questions.map(question => ({
+    ...question,
+    options: shuffleArray(question.options, random),
+  }));
+
+  return { ...topic, questions: shuffledQuestions };
+};
 
 export const QuizPage = () => {
   const { spreadsheetId, sheetName } = useParams<{ spreadsheetId: string; sheetName: string }>();
   const [searchParams] = useSearchParams();
   const maxParam = searchParams.get('max');
 
-  // Helper to preserve max parameter in navigation links
   const getSearchString = () => maxParam ? `?max=${maxParam}` : '';
 
   const [topic, setTopic] = useState<QuizTopic | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [initialState, setInitialState] = useState<QuizInitialState | undefined>();
+  const seedRef = useRef<number>(0);
 
-  const quiz = useQuiz(topic);
+  const quiz = useQuiz(topic, initialState);
 
   // Auto-save to localStorage when quiz loads
   const { spreadsheets, add: addSpreadsheet } = useSpreadsheets();
@@ -38,22 +60,31 @@ export const QuizPage = () => {
           return;
         }
 
+        // Check hash for existing state
+        const hashState = parseQuizHash(window.location.hash);
+        const seed = hashState?.seed ?? generateSeed();
+        seedRef.current = seed;
+
         const service = createSheetsService();
         const data = await service.fetchQuizTopic(spreadsheetId, sheetName, abortController.signal);
 
-        // Apply max limit with random selection if specified
         const max = maxParam ? parseInt(maxParam, 10) : undefined;
-        if (max && max > 0 && max < data.questions.length) {
-          const shuffledQuestions = shuffleArray(data.questions);
-          data.questions = shuffledQuestions.slice(0, max);
+        const shuffledTopic = shuffleTopicWithSeed(data, seed, max);
+
+        // If restoring from hash, build initial state
+        if (hashState) {
+          setInitialState({
+            currentQuestionIndex: Math.min(hashState.currentQuestionIndex, shuffledTopic.questions.length - 1),
+            answers: hashState.answers,
+            currentSelections: hashState.currentSelections,
+            showResult: hashState.showResult,
+          });
         }
 
-        setTopic(data);
+        setTopic(shuffledTopic);
         document.title = `Quiz: ${data.name}`;
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return; // Ignore abort errors
-        }
+        if (err instanceof Error && err.name === 'AbortError') return;
         setError(err instanceof Error ? err.message : 'Failed to load quiz');
       } finally {
         if (!abortController.signal.aborted) {
@@ -63,10 +94,7 @@ export const QuizPage = () => {
     };
 
     loadQuiz();
-
-    return () => {
-      abortController.abort();
-    };
+    return () => { abortController.abort(); };
   }, [spreadsheetId, sheetName, maxParam]);
 
   // Auto-save spreadsheet and sheet to localStorage when quiz loads successfully
@@ -79,8 +107,60 @@ export const QuizPage = () => {
     if (!sheets.some((s) => s.name === sheetName)) {
       addSheet(sheetName);
     }
-    // Only run when topic changes (i.e., when quiz successfully loads)
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topic]);
+
+  // Sync quiz state to URL hash
+  useEffect(() => {
+    if (!topic || !seedRef.current) return;
+
+    const questions = topic.questions;
+
+    // Convert userAnswers (object refs) back to option indices
+    const answers = new Map<number, Set<number>>();
+    for (const [qIdx, selectedOpts] of quiz.userAnswers) {
+      if (qIdx >= questions.length) continue;
+      const optIndices = new Set<number>();
+      for (const opt of selectedOpts) {
+        const idx = questions[qIdx].options.indexOf(opt);
+        if (idx >= 0) optIndices.add(idx);
+      }
+      if (optIndices.size > 0) answers.set(qIdx, optIndices);
+    }
+
+    // Convert current selections to option indices
+    const currentSelections = new Set<number>();
+    const currentQ = questions[quiz.currentQuestionIndex];
+    if (currentQ && !quiz.isAnswered) {
+      for (const opt of quiz.selectedOptions) {
+        const idx = currentQ.options.indexOf(opt);
+        if (idx >= 0) currentSelections.add(idx);
+      }
+    }
+
+    const hash = encodeQuizHash({
+      seed: seedRef.current,
+      currentQuestionIndex: quiz.currentQuestionIndex,
+      answers,
+      currentSelections,
+      showResult: quiz.showResult,
+    });
+
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
+  }, [topic, quiz.currentQuestionIndex, quiz.selectedOptions, quiz.userAnswers, quiz.isAnswered, quiz.showResult]);
+
+  // Handle restart: new seed, new shuffle
+  const handleRestart = useCallback(() => {
+    if (!topic) return;
+
+    const newSeed = generateSeed();
+    seedRef.current = newSeed;
+
+    // Re-fetch isn't needed — re-shuffle the original data
+    // But we don't have the original unsorted data anymore.
+    // Simplest: reload the page without hash to get a fresh quiz
+    window.location.hash = '';
+    window.location.reload();
   }, [topic]);
 
   if (loading) {
@@ -123,9 +203,9 @@ export const QuizPage = () => {
           score={quiz.score}
           total={quiz.totalQuestions}
           topicName={topic.name}
-          questions={quiz.shuffledQuestions}
+          questions={quiz.questions}
           userAnswers={quiz.userAnswers}
-          onRestart={quiz.restart}
+          onRestart={handleRestart}
         />
       </div>
     );
