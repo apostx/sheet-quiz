@@ -37,20 +37,23 @@ src/routes
 public
 
 # features
-path-based routing (/, /:spreadsheetId/, /:spreadsheetId/:sheetName/)
+path-based routing (/, /:spreadsheetId/, /:spreadsheetId/:sheetName/, /:spreadsheetId/:sheetName/results, /:spreadsheetId/:sheetName/search)
 localstorage-based spreadsheet and sheet list management
 drag-and-drop reordering with mobile touch support
 share button with clipboard copy for exporting/importing lists via URL (base64-encoded JSON, auto-import on page load, silently skips duplicates)
 backward compatibility with old URL param format (auto-redirects to new routes)
-github pages spa support via 404.html redirect
+github pages spa support via 404.html redirect (preserves query params and hash fragments)
 read questions from public google sheets (csv-export)
 single-answer and multi-answer question support
 radio buttons for single-answer, checkboxes for multi-answer
-shuffled quiz options (per question)
+seeded deterministic shuffle (mulberry32 PRNG) for reproducible question/option order
+quiz state preservation via URL hash fragment (#s=SEED&a=ANSWERS) — survives page reloads
 max param for limiting questions with random selection (persists on restart, re-randomizes on page reload)
 tooltip-based hints and notes with tap-to-toggle on mobile (supports HTML with links and images, fixed centered on mobile, absolute positioned on desktop, long URLs wrap properly)
 click-outside detection for tooltip auto-close
-detailed results review with partial selection indicators
+dedicated results route with detailed review, explanation labels, and partial selection indicators
+search page for browsing questions and correct answers
+auto-redirect to results when all questions answered on reload
 in-memory results calculation
 mobile responsive design (320px-428px phones, 640px+ tablets, 1024px+ desktop)
 responsive text sizing and touch-friendly UI elements
@@ -75,8 +78,14 @@ routes:
   /: home page, list saved spreadsheet IDs
   /:spreadsheetId/: list saved sheet names for spreadsheet
   /:spreadsheetId/:sheetName/: quiz view for specific sheet
+  /:spreadsheetId/:sheetName/results: results page (reconstructs answers from URL hash)
+  /:spreadsheetId/:sheetName/search: search/browse questions and correct answers
 query-params:
-  max: optional, limit questions to random subset (e.g., ?max=10) on quiz route
+  max: optional, limit questions to random subset (e.g., ?max=10) on quiz and results routes
+hash-fragment:
+  format: #s=SEED&a=Q:OPT,Q:OPT (seed + answered question indices with selected option indices)
+  example: #s=1330516298&a=0:0,1:2.3 (seed, q0→opt0, q1→opt2+opt3)
+  used-by: QuizPage (read/write), ResultsPage (read-only)
 backward-compatibility: old ?spreadsheetId=x&sheet=y format redirects to new /:spreadsheetId/:sheetName/ route
 
 # data-structure
@@ -104,7 +113,8 @@ ListManager: reusable add/delete/drag-reorder list component with mobile touch s
 ShareButton: reusable share button with clipboard copy and "Copied!" feedback
 SpreadsheetList: home page component for managing spreadsheet IDs with share functionality
 SheetList: spreadsheet detail page for managing sheet names with share functionality
-QuizPage: quiz view component (renamed from Quiz, uses route params instead of URL params)
+QuizPage: quiz view with seeded shuffle, hash state sync, auto-redirect to results when complete
+ResultsPage: self-contained results page, fetches data, reconstructs answers from URL hash
 
 # next-steps
 (none)
@@ -116,16 +126,18 @@ entry-points:
   index.html: HTML entry with 404 redirect restoration script
 
 routes (src/routes/):
-  Router.tsx: Route configuration with basename /sheet-quiz/, defines 4 routes (/, /:spreadsheetId, /:spreadsheetId/:sheetName, *)
+  Router.tsx: Route configuration with basename /sheet-quiz/, defines 6 routes (/, /:spreadsheetId, /:spreadsheetId/:sheetName/search, /:spreadsheetId/:sheetName/results, /:spreadsheetId/:sheetName, *)
   RedirectLegacy.tsx: Redirects old URL param format (?spreadsheetId=x&sheet=y) to new path-based routes, shows 404 for invalid URLs
 
 components-page (src/components/):
   SpreadsheetList.tsx: Home page (/), manages saved spreadsheet IDs with add/delete/reorder/share
   SheetList.tsx: Spreadsheet detail (/:spreadsheetId), manages sheet names for specific spreadsheet
-  QuizPage.tsx: Quiz wrapper (/:spreadsheetId/:sheetName), extracts route params and renders Quiz
+  QuizPage.tsx: Quiz page (/:spreadsheetId/:sheetName), seeded shuffle, hash state sync, auto-redirect to results
+  ResultsPage.tsx: Results page (/:spreadsheetId/:sheetName/results), reconstructs answers from hash, computes score
+  SearchPage.tsx: Search page (/:spreadsheetId/:sheetName/search), browse questions and correct answers
 
 components-quiz (src/components/):
-  Quiz.tsx: Quiz orchestrator, loads data from Google Sheets, applies max limit, manages quiz flow
+  Quiz.tsx: Legacy quiz orchestrator (unused, kept for backward compat)
   QuestionCard.tsx: Displays single question with note tooltip and option buttons
   OptionButton.tsx: Individual answer option with hint tooltip (radio for single, checkbox for multi)
   Results.tsx: Post-quiz results page with score and detailed review
@@ -156,7 +168,8 @@ services (src/services/):
 
 utils (src/utils/):
   storage.ts: Safe localStorage read/write with quota exceeded handling (safeGetItem, safeSetItem)
-  shuffle.ts: Fisher-Yates shuffle algorithm for arrays and quiz options (preserves object references)
+  shuffle.ts: Fisher-Yates shuffle with seeded PRNG (mulberry32), shuffleTopicWithSeed for deterministic quiz order
+  quizHash.ts: URL hash encoding/decoding for quiz state (seed + answers as question:option indices)
   url.ts: URL parameter parsing (spreadsheetId, sheet, max from legacy query params)
   share.ts: Base64 encoding/decoding for shareable URLs (URL-safe format, clipboard operations with fallback)
   index.ts: Utility exports
@@ -171,7 +184,13 @@ object-reference-tracking:
   why: Options are shuffled per question but correctness check needs stable references
   how: Set<QuizOption> tracks selected options by object reference (not index)
   benefit: Works after shuffle, O(1) has() lookup, type-safe
-  location: useQuiz.ts lines 36-54 (selectOption), lines 61-63 (correctness check)
+  location: useQuiz.ts (selectOption, correctness check)
+
+seeded-shuffle-state:
+  why: Quiz progress preserved across page reloads without server/localStorage
+  how: Seed stored in URL hash, deterministic PRNG reproduces same shuffle order
+  flow: QuizPage generates seed → shuffles topic → syncs answers to hash → ResultsPage reads hash + re-shuffles with same seed
+  hash-format: #s=SEED&a=Q:OPT,Q:OPT (question index : option indices separated by dots)
 
 path-based-routing:
   modern: /:spreadsheetId/:sheetName/ format
