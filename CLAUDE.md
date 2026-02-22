@@ -35,6 +35,7 @@ src/assets
 src/routes
 .storybook
 public
+scripts
 
 # features
 path-based routing (/, /:spreadsheetId/, /:spreadsheetId/:sheetName/, /:spreadsheetId/:sheetName/results, /:spreadsheetId/:sheetName/search)
@@ -47,13 +48,13 @@ read questions from public google sheets (csv-export)
 single-answer and multi-answer question support
 radio buttons for single-answer, checkboxes for multi-answer
 seeded deterministic shuffle (mulberry32 PRNG) for reproducible question/option order
-quiz state preservation via URL hash fragment (#s=SEED&a=ANSWERS) — survives page reloads
+quiz state preservation via URL hash fragment (#s=SEED&q=INDEX&a=ANSWERS) — survives page reloads, supports question navigation and review
 max param for limiting questions with random selection (persists on restart, re-randomizes on page reload)
 tooltip-based hints and notes with tap-to-toggle on mobile (supports HTML with links and images, fixed centered on mobile, absolute positioned on desktop, long URLs wrap properly)
 click-outside detection for tooltip auto-close
 dedicated results route with detailed review, explanation labels, and partial selection indicators
 search page for browsing questions and correct answers
-auto-redirect to results when all questions answered on reload
+auto-redirect to results when question index exceeds total (safety net)
 in-memory results calculation
 mobile responsive design (320px-428px phones, 640px+ tablets, 1024px+ desktop)
 responsive text sizing and touch-friendly UI elements
@@ -83,9 +84,11 @@ routes:
 query-params:
   max: optional, limit questions to random subset (e.g., ?max=10) on quiz and results routes
 hash-fragment:
-  format: #s=SEED&a=Q:OPT,Q:OPT (seed + answered question indices with selected option indices)
-  example: #s=1330516298&a=0:0,1:2.3 (seed, q0→opt0, q1→opt2+opt3)
+  format: #s=SEED&q=INDEX&a=OPT,OPT.OPT,,OPT (seed + current question index + positional answer array)
+  example: #s=1330516298&q=1&a=0,2.3 (seed, viewing q1, q0→opt0, q1→opt2+opt3)
+  sparse: empty positions = unanswered (e.g., a=0,,1 means q0→opt0, q1=unanswered, q2→opt1)
   used-by: QuizPage (read/write), ResultsPage (read-only)
+  on-reload: shows question at q index (even if answered, for review), no auto-advance
 backward-compatibility: old ?spreadsheetId=x&sheet=y format redirects to new /:spreadsheetId/:sheetName/ route
 
 # data-structure
@@ -163,13 +166,13 @@ hooks (src/hooks/):
   useClickOutside.ts: Click-outside detection for tooltip auto-close
 
 services (src/services/):
-  sheets.ts: SheetsService class for fetching and parsing Google Sheets CSV (gviz/tq?tqx=out:csv endpoint, manual CSV parser with quoted field handling)
+  sheets.ts: SheetsService class for fetching and parsing Google Sheets CSV (gviz/tq?tqx=out:csv endpoint, RFC 4180-compliant character-by-character CSV parser with multi-line quoted field support)
   index.ts: Service exports (createSheetsService factory function)
 
 utils (src/utils/):
   storage.ts: Safe localStorage read/write with quota exceeded handling (safeGetItem, safeSetItem)
   shuffle.ts: Fisher-Yates shuffle with seeded PRNG (mulberry32), shuffleTopicWithSeed for deterministic quiz order
-  quizHash.ts: URL hash encoding/decoding for quiz state (seed + answers as question:option indices)
+  quizHash.ts: URL hash encoding/decoding for quiz state (seed + question index + positional answer array)
   url.ts: URL parameter parsing (spreadsheetId, sheet, max from legacy query params)
   share.ts: Base64 encoding/decoding for shareable URLs (URL-safe format, clipboard operations with fallback)
   index.ts: Utility exports
@@ -190,7 +193,7 @@ seeded-shuffle-state:
   why: Quiz progress preserved across page reloads without server/localStorage
   how: Seed stored in URL hash, deterministic PRNG reproduces same shuffle order
   flow: QuizPage generates seed → shuffles topic → syncs answers to hash → ResultsPage reads hash + re-shuffles with same seed
-  hash-format: #s=SEED&a=Q:OPT,Q:OPT (question index : option indices separated by dots)
+  hash-format: #s=SEED&q=INDEX&a=OPT,OPT.OPT,,OPT (positional array, dots for multi-select)
 
 path-based-routing:
   modern: /:spreadsheetId/:sheetName/ format

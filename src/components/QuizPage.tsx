@@ -56,6 +56,7 @@ export const QuizPage = () => {
         // If restoring from hash, build initial state
         if (hashState) {
           setInitialState({
+            questionIndex: hashState.questionIndex,
             answers: hashState.answers,
           });
         }
@@ -89,12 +90,12 @@ export const QuizPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]);
 
-  // Auto-redirect to results when all questions are answered (e.g. after page reload)
+  // Safety net: redirect to results if question index is out of bounds
   useEffect(() => {
-    if (topic && !quiz.currentQuestion && quiz.totalQuestions > 0) {
+    if (topic && quiz.totalQuestions > 0 && quiz.currentQuestionIndex >= quiz.totalQuestions) {
       navigate(`/${spreadsheetId}/${sheetName}/results${getSearchString()}${window.location.hash}`, { replace: true });
     }
-  }, [topic, quiz.currentQuestion, quiz.totalQuestions, spreadsheetId, sheetName, navigate]);
+  }, [topic, quiz.currentQuestionIndex, quiz.totalQuestions, spreadsheetId, sheetName, navigate]);
 
   // Sync quiz state to URL hash
   useEffect(() => {
@@ -116,11 +117,12 @@ export const QuizPage = () => {
 
     const hash = encodeQuizHash({
       seed: seedRef.current,
+      questionIndex: quiz.currentQuestionIndex,
       answers,
     });
 
     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
-  }, [topic, quiz.userAnswers]);
+  }, [topic, quiz.userAnswers, quiz.currentQuestionIndex]);
 
   // Navigate to results route when quiz is complete
   const handleViewResults = () => {

@@ -23,41 +23,54 @@ export class SheetsService {
   }
 
   private parseCSV(csvText: string): string[][] {
-    const lines = csvText.split('\n');
     const result: string[][] = [];
+    let i = 0;
+    const n = csvText.length;
 
-    for (const line of lines) {
-      if (!line.trim()) continue;
-
+    while (i < n) {
       const row: string[] = [];
-      let current = '';
-      let inQuotes = false;
 
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
+      // Parse all cells in this row
+      while (i < n) {
+        let cell = '';
 
-        if (char === '"') {
-          if (inQuotes && line[i + 1] === '"') {
-            current += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
+        if (csvText[i] === '"') {
+          // Quoted field — may contain embedded commas and newlines
+          i++; // skip opening quote
+          while (i < n) {
+            if (csvText[i] === '"') {
+              if (i + 1 < n && csvText[i + 1] === '"') {
+                cell += '"'; i += 2; // escaped quote ""
+              } else {
+                i++; break; // closing quote
+              }
+            } else {
+              cell += csvText[i++];
+            }
           }
-        } else if (char === ',' && !inQuotes) {
-          row.push(current);
-          current = '';
         } else {
-          current += char;
+          // Unquoted field — stop at comma or line terminator
+          while (i < n && csvText[i] !== ',' && csvText[i] !== '\n' && csvText[i] !== '\r') {
+            cell += csvText[i++];
+          }
+        }
+
+        row.push(cell);
+
+        if (i < n && csvText[i] === ',') {
+          i++; // advance past comma, continue to next cell
+        } else {
+          break; // end of row
         }
       }
-      row.push(current);
-      // Remove trailing empty strings (from trailing commas)
-      while (row.length > 0 && row[row.length - 1] === '') {
-        row.pop();
-      }
-      if (row.length > 0) {
-        result.push(row);
-      }
+
+      // Skip row terminator (\r\n or \n)
+      if (i < n && csvText[i] === '\r') i++;
+      if (i < n && csvText[i] === '\n') i++;
+
+      // Remove trailing empty cells and add non-empty rows
+      while (row.length > 0 && row[row.length - 1] === '') row.pop();
+      if (row.length > 0) result.push(row);
     }
 
     return result;

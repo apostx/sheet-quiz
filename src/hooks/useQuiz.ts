@@ -10,6 +10,7 @@ interface QuizState {
 }
 
 export interface QuizInitialState {
+  questionIndex: number; // which question to show
   answers: Map<number, Set<number>>; // questionIndex → Set<optionIndex>
 }
 
@@ -17,9 +18,13 @@ const buildInitialState = (
   topic: QuizTopic,
   initial?: QuizInitialState,
 ): QuizState => {
+  const questions = topic.questions;
+  const maxIndex = Math.max(0, questions.length - 1);
+
   if (!initial || initial.answers.size === 0) {
+    const questionIndex = Math.min(initial?.questionIndex ?? 0, maxIndex);
     return {
-      currentQuestionIndex: 0,
+      currentQuestionIndex: questionIndex,
       selectedOptions: new Set(),
       answeredQuestions: new Set(),
       correctAnswers: new Set(),
@@ -27,7 +32,6 @@ const buildInitialState = (
     };
   }
 
-  const questions = topic.questions;
   const answeredQuestions = new Set<number>();
   const correctAnswers = new Set<number>();
   const userAnswers = new Map<number, Set<QuizOption>>();
@@ -57,12 +61,15 @@ const buildInitialState = (
     }
   }
 
-  // Current question = next unanswered (i.e. count of answered questions)
-  const currentQuestionIndex = answeredQuestions.size;
+  // Use question index from hash, clamped to valid range
+  const currentQuestionIndex = Math.min(initial.questionIndex, maxIndex);
+
+  // If current question is already answered, populate selectedOptions so user can review
+  const currentAnswers = userAnswers.get(currentQuestionIndex);
 
   return {
     currentQuestionIndex,
-    selectedOptions: new Set(),
+    selectedOptions: currentAnswers ? new Set(currentAnswers) : new Set(),
     answeredQuestions,
     correctAnswers,
     userAnswers,
@@ -140,11 +147,16 @@ export const useQuiz = (topic: QuizTopic | null, initialState?: QuizInitialState
   };
 
   const nextQuestion = () => {
-    setState(prev => ({
-      ...prev,
-      currentQuestionIndex: prev.currentQuestionIndex + 1,
-      selectedOptions: new Set(),
-    }));
+    setState(prev => {
+      const nextIdx = prev.currentQuestionIndex + 1;
+      // If next question has existing answer, populate selectedOptions for review
+      const existingAnswer = prev.userAnswers.get(nextIdx);
+      return {
+        ...prev,
+        currentQuestionIndex: nextIdx,
+        selectedOptions: existingAnswer ? new Set(existingAnswer) : new Set(),
+      };
+    });
   };
 
   const restart = () => {
