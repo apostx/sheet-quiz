@@ -38,4 +38,4 @@ questions/**/*.json
 questions/**/*.tsv
 
 # Conversion scripts
-scripts/convert-json-to-tsv.ts
+scripts/

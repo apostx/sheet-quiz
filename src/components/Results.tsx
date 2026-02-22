@@ -58,7 +58,7 @@ export const Results = ({ score, total, topicName, questions, userAnswers, onRes
                 <div className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
                   {isCorrect ? '✓' : '✗'}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <h4 className="font-bold text-base sm:text-lg mb-1">Question {index + 1}</h4>
                   <div className="text-gray-800 text-sm sm:text-base">
                     <HtmlContent html={question.question} variant="light" />

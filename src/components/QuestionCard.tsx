@@ -45,7 +45,7 @@ export const QuestionCard = ({
     <div className="max-w-3xl mx-auto">
       <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <div className="flex items-start gap-3 mb-6">
-          <h2 className="text-base sm:text-lg font-semibold leading-relaxed flex-1">
+          <h2 className="text-base sm:text-lg font-semibold leading-relaxed flex-1 min-w-0">
             <HtmlContent html={question.question} variant="light" />
           </h2>
           {question.note && (
