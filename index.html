@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/sheet-quiz/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sheet Quiz</title>
     <script type="text/javascript">
@@ -11,12 +11,12 @@
         var redirect = new URLSearchParams(window.location.search).get('redirect');
         if (redirect) {
           // Prepend basename to maintain router compatibility
-          history.replaceState(null, '', '/sheet-quiz' + redirect);
+          history.replaceState(null, '', redirect);
         }
       })();
     </script>
-    <script type="module" crossorigin src="/sheet-quiz/assets/index-C8VzKf-u.js"></script>
-    <link rel="stylesheet" crossorigin href="/sheet-quiz/assets/index-0BbP2mro.css">
+    <script type="module" crossorigin src="/assets/index-C-eSo1h1.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-0BbP2mro.css">
   </head>
   <body>
     <div id="root"></div>

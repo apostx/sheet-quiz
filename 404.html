@@ -14,17 +14,12 @@
           var pathSegments = pathname.split('/').filter(Boolean);
           console.log('[404] Path segments:', pathSegments);
 
-          // Remove 'sheet-quiz' prefix if present
-          if (pathSegments[0] === 'sheet-quiz') {
-            pathSegments.shift();
-          }
-
           var route = pathSegments.join('/');
           var search = window.location.search || '';
           var hash = window.location.hash || '';
 
           var redirectPath = '/' + route + search + hash;
-          var redirectUrl = '/sheet-quiz/?redirect=' + encodeURIComponent(redirectPath);
+          var redirectUrl = '/?redirect=' + encodeURIComponent(redirectPath);
 
           console.log('[404] Redirecting to:', redirectUrl);
 
@@ -52,7 +47,7 @@
     <script>
       // Fallback message after 3 seconds
       setTimeout(function() {
-        document.body.innerHTML = '<h1>Redirect Failed</h1><p>Please navigate to <a href="/sheet-quiz/">Sheet Quiz</a> manually.</p>';
+        document.body.innerHTML = '<h1>Redirect Failed</h1><p>Please navigate to <a href="/">Sheet Quiz</a> manually.</p>';
       }, 3000);
     </script>
   </body>
