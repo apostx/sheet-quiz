@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  base: '/sheet-quiz/',
+  base: '/',
   plugins: [react(), tailwindcss()],
   test: {
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],

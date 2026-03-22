@@ -4,21 +4,21 @@ An interactive quiz application that reads questions directly from public Google
 
 ## Live Demo
 
-**Quiz App**: https://apostx.github.io/sheet-quiz/
-**Storybook**: https://apostx.github.io/sheet-quiz/storybook/
+**Quiz App**: http://sheetquiz.sallai.cc/
+**Storybook**: http://sheetquiz.sallai.cc/storybook/
 
 ## Try It Out
 
 See a sample quiz in action:
 
 ```
-https://apostx.github.io/sheet-quiz/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/
+http://sheetquiz.sallai.cc/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/
 ```
 
 Or limit to 5 random questions:
 
 ```
-https://apostx.github.io/sheet-quiz/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/?max=5
+http://sheetquiz.sallai.cc/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/?max=5
 ```
 
 ## Features
@@ -89,12 +89,12 @@ https://docs.google.com/spreadsheets/d/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQv
 
 Format:
 ```
-https://apostx.github.io/sheet-quiz/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/
+http://sheetquiz.sallai.cc/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/
 ```
 
 Example:
 ```
-https://apostx.github.io/sheet-quiz/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/
+http://sheetquiz.sallai.cc/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20What%20is%20Cloud%20Computing/
 ```
 
 **Note**: URL-encode the sheet name (spaces become `%20`)
@@ -107,7 +107,7 @@ https://apostx.github.io/sheet-quiz/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg
 
 Example with max parameter:
 ```
-https://apostx.github.io/sheet-quiz/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/?max=10
+http://sheetquiz.sallai.cc/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/?max=10
 ```
 
 The `max` parameter persists across quiz restarts but re-randomizes question selection on page reload.
@@ -135,7 +135,7 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173/sheet-quiz/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/` to test your quiz.
+Visit `http://localhost:5173/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/` to test your quiz.
 
 ### Available Scripts
 

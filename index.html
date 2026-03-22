@@ -11,7 +11,7 @@
         var redirect = new URLSearchParams(window.location.search).get('redirect');
         if (redirect) {
           // Prepend basename to maintain router compatibility
-          history.replaceState(null, '', '/sheet-quiz' + redirect);
+          history.replaceState(null, '', redirect);
         }
       })();
     </script>

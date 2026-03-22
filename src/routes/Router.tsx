@@ -33,9 +33,7 @@ const router = createBrowserRouter(
       element: <RedirectLegacy />,
     },
   ],
-  {
-    basename: '/sheet-quiz/',
-  }
+  {}
 );
 
 export const Router = () => <RouterProvider router={router} />;

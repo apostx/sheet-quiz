@@ -3,8 +3,8 @@ name: sheet-quiz
 type: static-spa
 hosting: github-pages
 status: deployment-configured
-deploy-url: https://apostx.github.io/sheet-quiz/
-storybook-url: https://apostx.github.io/sheet-quiz/storybook/
+deploy-url: http://sheetquiz.sallai.cc/
+storybook-url: http://sheetquiz.sallai.cc/storybook/
 
 # stack
 typescript
@@ -129,7 +129,7 @@ entry-points:
   index.html: HTML entry with 404 redirect restoration script
 
 routes (src/routes/):
-  Router.tsx: Route configuration with basename /sheet-quiz/, defines 6 routes (/, /:spreadsheetId, /:spreadsheetId/:sheetName/search, /:spreadsheetId/:sheetName/results, /:spreadsheetId/:sheetName, *)
+  Router.tsx: Route configuration, defines 6 routes (/, /:spreadsheetId, /:spreadsheetId/:sheetName/search, /:spreadsheetId/:sheetName/results, /:spreadsheetId/:sheetName, *)
   RedirectLegacy.tsx: Redirects old URL param format (?spreadsheetId=x&sheet=y) to new path-based routes, shows 404 for invalid URLs
 
 components-page (src/components/):
