@@ -38,13 +38,15 @@ public
 scripts
 
 # features
-path-based routing (/, /:spreadsheetId/, /:spreadsheetId/:sheetName/, /:spreadsheetId/:sheetName/results, /:spreadsheetId/:sheetName/search)
+path-based routing (/, /receive, /:spreadsheetId/, /:spreadsheetId/:sheetName/, /:spreadsheetId/:sheetName/results, /:spreadsheetId/:sheetName/search)
 localstorage-based spreadsheet and sheet list management
 drag-and-drop reordering with mobile touch support
 share button with clipboard copy for exporting/importing lists via URL (base64-encoded JSON, auto-import on page load, silently skips duplicates)
 backward compatibility with old URL param format (auto-redirects to new routes)
 github pages spa support via 404.html redirect (preserves query params and hash fragments)
 read questions from public google sheets (csv-export)
+receive quizzes from other apps (DomainMap) via postMessage on /receive, stored in localStorage and listed like spreadsheets under a ~ prefixed ID (no new UI elements)
+html of received quizzes sanitized with a dependency-free allowlist (DOMParser), google sheets content rendered as before
 single-answer and multi-answer question support
 radio buttons for single-answer, checkboxes for multi-answer
 seeded deterministic shuffle (mulberry32 PRNG) for reproducible question/option order
@@ -77,6 +79,7 @@ versioning: semantic versioning (MAJOR.MINOR.PATCH), bump MINOR for new features
 # routing
 routes:
   /: home page, list saved spreadsheet IDs
+  /receive: receives a quiz from the opener window (DomainMap export protocol v1), saves it, redirects to /~<dataset>/<title>
   /:spreadsheetId/: list saved sheet names for spreadsheet
   /:spreadsheetId/:sheetName/: quiz view for specific sheet
   /:spreadsheetId/:sheetName/results: results page (reconstructs answers from URL hash)
@@ -90,6 +93,7 @@ hash-fragment:
   used-by: QuizPage (read/write), ResultsPage (read-only)
   on-reload: shows question at q index (even if answered, for review), no auto-advance
 backward-compatibility: old ?spreadsheetId=x&sheet=y format redirects to new /:spreadsheetId/:sheetName/ route
+local-quizzes: spreadsheetId starting with ~ (never in Google IDs) = dataset of received quizzes, sheetName = export title; SheetsService reads them from localStorage
 
 # data-structure
 row-format: question, note, correctIndices, option1-response, option1-hint, option2-response, option2-hint, ...
@@ -100,6 +104,7 @@ html-support: notes and hints support HTML content (links, images) via HtmlConte
 localstorage-schema:
   sheet-quiz:spreadsheets: StoredSpreadsheet[] (id, order)
   sheet-quiz:sheets: StoredSheet[] (spreadsheetId, name, order)
+  sheet-quiz:packs: StoredPack[] (spreadsheetId, sheetName, datasetName, csv, receivedAt) — received quizzes, upserted by spreadsheetId + sheetName
 
 # hooks
 useQuiz: quiz state management (current question, selection, scoring)
@@ -138,6 +143,7 @@ components-page (src/components/):
   QuizPage.tsx: Quiz page (/:spreadsheetId/:sheetName), seeded shuffle, hash state sync, auto-redirect to results
   ResultsPage.tsx: Results page (/:spreadsheetId/:sheetName/results), reconstructs answers from hash, computes score
   SearchPage.tsx: Search page (/:spreadsheetId/:sheetName/search), browse questions and correct answers
+  ReceivePage.tsx: Receive page (/receive), postMessage handshake with window.opener, validates, saves, starts the quiz
 
 components-quiz (src/components/):
   Quiz.tsx: Legacy quiz orchestrator (unused, kept for backward compat)
@@ -166,7 +172,9 @@ hooks (src/hooks/):
   useClickOutside.ts: Click-outside detection for tooltip auto-close
 
 services (src/services/):
-  sheets.ts: SheetsService class for fetching and parsing Google Sheets CSV (gviz/tq?tqx=out:csv endpoint, RFC 4180-compliant character-by-character CSV parser with multi-line quoted field support)
+  sheets.ts: SheetsService class for fetching and parsing Google Sheets CSV (gviz/tq?tqx=out:csv endpoint, RFC 4180-compliant character-by-character CSV parser with multi-line quoted field support); local (~) spreadsheet IDs read from localPacks; parseQuizTopic(csv, name, {sanitize}) is public
+  receive.ts: DomainMap export protocol v1 (message types, readExportMessage validation, size limit, accepted format 'quiz')
+  localPacks.ts: received quizzes in localStorage (LOCAL_PREFIX '~', slugged dataset IDs, save/find/remove, spreadsheetLabel shows the dataset name)
   index.ts: Service exports (createSheetsService factory function)
 
 utils (src/utils/):
@@ -175,6 +183,7 @@ utils (src/utils/):
   quizHash.ts: URL hash encoding/decoding for quiz state (seed + question index + positional answer array)
   url.ts: URL parameter parsing (spreadsheetId, sheet, max from legacy query params)
   share.ts: Base64 encoding/decoding for shareable URLs (URL-safe format, clipboard operations with fallback)
+  sanitizeHtml.ts: allowlist HTML sanitizer (DOMParser), drops scripts/frames/handlers/javascript: links, used for received quizzes
   index.ts: Utility exports
 
 types (src/types/):
@@ -230,6 +239,12 @@ storage-persistence:
   then-read: src/hooks/useSpreadsheets.ts, src/hooks/useSheets.ts
   modify: Storage utilities, generic hook, CRUD hooks
   test: DevTools Application tab, verify quota exceeded handling
+
+receiving-quizzes:
+  read-first: src/services/receive.ts, src/services/localPacks.ts, src/components/ReceivePage.tsx
+  then-read: src/services/sheets.ts, src/hooks/useSpreadsheets.ts, src/hooks/useSheets.ts
+  modify: protocol validation, storage, labels; keep share links free of ~ entries
+  test: src/services/*.test.ts, e2e/receive.spec.ts (opens /receive from a page and plays the sender)
 
 share-functionality:
   read-first: src/utils/share.ts, src/hooks/useShareLink.ts

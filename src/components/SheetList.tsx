@@ -6,6 +6,7 @@ import { useSheets } from '../hooks/useSheets';
 import { decodeShareData } from '../utils/share';
 import { safeGetItem, safeSetItem } from '../utils/storage';
 import { STORAGE_KEYS, type StoredSheet } from '../types/storage';
+import { isLocalSpreadsheet, spreadsheetLabel } from '../services/localPacks';
 
 export const SheetList = () => {
   const { spreadsheetId } = useParams<{ spreadsheetId: string }>();
@@ -92,11 +93,14 @@ export const SheetList = () => {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Select Sheet</h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-2 break-all">Spreadsheet: {spreadsheetId}</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-2 break-all">Spreadsheet: {spreadsheetLabel(spreadsheetId)}</p>
             </div>
-            <div className="flex-shrink-0">
-              <ShareButton data={shareData} />
-            </div>
+            {/* Quizzes received from other apps exist only in this browser, so there is nothing to share */}
+            {!isLocalSpreadsheet(spreadsheetId) && (
+              <div className="flex-shrink-0">
+                <ShareButton data={shareData} />
+              </div>
+            )}
           </div>
         </div>
       </div>

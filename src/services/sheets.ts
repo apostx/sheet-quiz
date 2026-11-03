@@ -1,7 +1,18 @@
 import type { QuizQuestion, QuizOption, QuizTopic } from '../types/quiz';
+import { sanitizeHtml } from '../utils/sanitizeHtml';
+import { findPack, isLocalSpreadsheet } from './localPacks';
 
 export class SheetsService {
   async fetchQuizTopic(spreadsheetId: string, sheetName: string, signal?: AbortSignal): Promise<QuizTopic> {
+    // Quizzes received from other apps are read from this browser instead of Google Sheets
+    if (isLocalSpreadsheet(spreadsheetId)) {
+      const pack = findPack(spreadsheetId, sheetName);
+      if (!pack) {
+        throw new Error('This quiz is no longer saved in this browser. Send it again from the app it came from.');
+      }
+      return this.parseQuizTopic(pack.csv, sheetName, { sanitize: true });
+    }
+
     // Use CSV export URL - works for public sheets without API key
     const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&headers=0`;
 
@@ -12,13 +23,20 @@ export class SheetsService {
     }
 
     const csvText = await response.text();
-    const rows = this.parseCSV(csvText);
+    return this.parseQuizTopic(csvText, sheetName);
+  }
 
-    const questions = this.parseRows(rows);
+  /**
+   * A quiz from the text of a sheet in comma-separated values. With `sanitize`, cells lose any
+   * markup that could run code, for content that does not come from the user's own sheets.
+   */
+  parseQuizTopic(csvText: string, name: string, options: { sanitize?: boolean } = {}): QuizTopic {
+    let rows = this.parseCSV(csvText);
+    if (options.sanitize) rows = rows.map((row) => row.map(sanitizeHtml));
 
     return {
-      name: sheetName,
-      questions,
+      name,
+      questions: this.parseRows(rows),
     };
   }
 

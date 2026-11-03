@@ -8,6 +8,7 @@ import { getQuizParams } from '../utils/url';
 import { decodeShareData } from '../utils/share';
 import { safeGetItem, safeSetItem } from '../utils/storage';
 import { STORAGE_KEYS, type StoredSpreadsheet, type StoredSheet } from '../types/storage';
+import { isLocalSpreadsheet, spreadsheetLabel } from '../services/localPacks';
 
 export const SpreadsheetList = () => {
   // Check for old URL param format and redirect
@@ -91,11 +92,11 @@ export const SpreadsheetList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Prepare share data
+  // Prepare share data; quizzes received from other apps exist only in this browser
   const shareData = {
     version: 1 as const,
-    spreadsheets,
-    sheets: allSheets,
+    spreadsheets: spreadsheets.filter((s) => !isLocalSpreadsheet(s.id)),
+    sheets: allSheets.filter((s) => !isLocalSpreadsheet(s.spreadsheetId)),
   };
 
   return (
@@ -128,7 +129,7 @@ export const SpreadsheetList = () => {
               to={`/${item.id}${getSearchString()}`}
               className="block hover:text-blue-600 transition-colors break-all"
             >
-              {item.id}
+              {spreadsheetLabel(item.id)}
             </Link>
           )}
         />

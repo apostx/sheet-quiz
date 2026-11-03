@@ -4,6 +4,7 @@ import { SheetList } from '../components/SheetList';
 import { QuizPage } from '../components/QuizPage';
 import { ResultsPage } from '../components/ResultsPage';
 import { SearchPage } from '../components/SearchPage';
+import { ReceivePage } from '../components/ReceivePage';
 import { RedirectLegacy } from './RedirectLegacy';
 
 const router = createBrowserRouter(
@@ -11,6 +12,10 @@ const router = createBrowserRouter(
     {
       path: '/',
       element: <SpreadsheetList />,
+    },
+    {
+      path: '/receive',
+      element: <ReceivePage />,
     },
     {
       path: '/:spreadsheetId',
