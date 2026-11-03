@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
 import { STORAGE_KEYS, type StoredSpreadsheet } from '../types/storage';
+import { isLocalSpreadsheet, removeLocalSpreadsheet } from '../services/localPacks';
 
 export function useSpreadsheets() {
   const [spreadsheets, setSpreadsheets] = useLocalStorage<StoredSpreadsheet[]>(
@@ -28,6 +29,7 @@ export function useSpreadsheets() {
 
   const remove = useCallback(
     (id: string) => {
+      if (isLocalSpreadsheet(id)) removeLocalSpreadsheet(id);
       const filtered = spreadsheets.filter((s) => s.id !== id);
       const reordered = filtered.map((s, index) => ({ ...s, order: index }));
       setSpreadsheets(reordered);

@@ -8,3 +8,4 @@ export { SheetList } from './SheetList';
 export { ShareButton } from './ShareButton';
 export { ResultsPage } from './ResultsPage';
 export { SearchPage } from './SearchPage';
+export { ReceivePage } from './ReceivePage';

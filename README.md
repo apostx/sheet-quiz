@@ -30,6 +30,7 @@ http://sheetquiz.sallai.cc/1Z1zyrsPZ6e9LF9DiWrCbE_DZy5qyNsXmPHBY-UQvcMg/1%20-%20
 - ✅ **Hints & Notes** - Add tooltips and context to questions and answers (supports HTML)
 - ✅ **List Management** - Save, organize, and reorder spreadsheets/sheets with drag-and-drop
 - ✅ **Share Lists** - Export/import your quiz collections via shareable URLs
+- ✅ **Quizzes From Other Apps** - Receive a quiz from another app, such as DomainMap, without a spreadsheet; it stays listed in the browser
 - ✅ **Detailed Results** - Review all questions with correct/incorrect indicators
 - ✅ **Zero Backend** - Runs entirely in the browser, no server required
 - ✅ **Mobile Responsive** - Works on desktop, tablet, and mobile devices
@@ -113,6 +114,25 @@ http://sheetquiz.sallai.cc/YOUR_SPREADSHEET_ID/YOUR_SHEET_NAME/?max=10
 The `max` parameter persists across quiz restarts but re-randomizes question selection on page reload.
 
 **Legacy URL format**: The old query param format (`?spreadsheetId=...&sheet=...`) is still supported and automatically redirects to the new path-based format.
+
+## Receiving Quizzes From Other Apps
+
+Another app can hand a quiz to Sheet Quiz without a file or a Google Sheet; DomainMap does so
+from its glossary. The quiz is kept in the browser (localStorage), starts at once and is listed
+on the home page under the name of its source, like a spreadsheet. Deleting it from the list
+deletes the stored quiz; the share link leaves such quizzes out, since they exist only in this
+browser. Received content is cleaned of scripts and other active markup before it is shown.
+
+The sender opens `/receive` in a new tab and talks to it with `postMessage` (version 1):
+
+1. Sheet Quiz says it is ready: `{ type: 'domain-map:ready', version: 1 }`.
+2. The sender answers with the quiz, a sheet in the format above as comma-separated values:
+   `{ type: 'domain-map:export', version: 1, format: 'quiz', dataset: { id, name }, title, csv }`.
+3. Sheet Quiz answers `{ type: 'domain-map:received', version: 1 }`, or
+   `{ type: 'domain-map:failed', version: 1, reason }` with a sentence the sender can show.
+
+Sending the same dataset and title again replaces the stored quiz. The quiz is then at
+`/~<dataset id>/<title>`; the `~` prefix keeps these apart from Google Sheets IDs.
 
 ## Local Development
 
